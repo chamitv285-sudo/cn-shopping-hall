@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="C&N Shopping Hall — Shop, Play, Explore. Order through WhatsApp.">
+<title>C&N SHOPPING HALL | Shop • Play • Explore</title>
+<style>
+:root{--gold:#e8bd58;--ink:#101820;--panel:#17232c;--green:#28d66f;--blue:#1688ed;--cream:#f5f3ed}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#090e12;color:#fff;font-family:Arial,Helvetica,sans-serif}
+a{color:inherit;text-decoration:none}button,input,select{font:inherit}
+.topbar{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px clamp(14px,3vw,38px);background:rgba(8,13,18,.96);border-bottom:1px solid #3b3322;backdrop-filter:blur(12px)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.5px}.logo{width:44px;height:44px;border:2px solid var(--gold);border-radius:50%;display:grid;place-items:center;color:var(--gold);font-weight:900;font-size:13px;box-shadow:0 0 18px #c69a3330}.brand small{display:block;color:#d8c18d;font-size:10px;letter-spacing:2px;margin-top:3px}
+nav{display:flex;gap:16px;align-items:center;font-size:13px;color:#e9e9e9}nav a:hover{color:var(--gold)}.pill{background:var(--green);color:#062311;font-weight:800;padding:10px 14px;border:0;border-radius:7px;cursor:pointer}
+.hero{position:relative;min-height:390px;overflow:hidden;background:#15191b}.hero img{width:100%;height:clamp(360px,48vw,600px);object-fit:cover;object-position:center 38%;display:block;filter:brightness(.75)}.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.82),rgba(0,0,0,.12) 75%),linear-gradient(0deg,rgba(0,0,0,.48),transparent 50%);pointer-events:none}
+.hero-copy{position:absolute;z-index:1;left:clamp(20px,5vw,70px);bottom:clamp(24px,5vw,58px);max-width:520px}.eyebrow{color:var(--gold);font-weight:800;letter-spacing:3px;font-size:12px}.hero h1{font-size:clamp(34px,5vw,65px);line-height:.98;margin:12px 0}.hero p{max-width:430px;color:#f1eee7;line-height:1.55}.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}.btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 17px;border-radius:7px;border:1px solid #ffffff55;font-weight:800;font-size:13px;cursor:pointer}.btn.gold{background:var(--gold);color:#1a1407;border-color:var(--gold)}.btn.ghost{background:#101820bb;color:#fff}
+.features{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px clamp(14px,3vw,38px);background:#10171d;border-bottom:1px solid #28313a}.feature{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid #303b44;border-radius:10px;background:linear-gradient(135deg,#1b2831,#11171c);font-size:13px}.ico{width:35px;height:35px;display:grid;place-items:center;border-radius:50%;background:#273e50;font-size:18px;flex-shrink:0}
+.section{padding:32px clamp(14px,3vw,38px)}.section-head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:18px}.section h2{margin:0;font-size:clamp(23px,3vw,32px)}.section-head p{margin:7px 0 0;color:#b9c2c9;font-size:13px}.categories{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.cat{position:relative;overflow:hidden;border-radius:12px;min-height:135px;padding:18px;background:linear-gradient(135deg,#3a2c1c,#131b20);border:1px solid #4b4438;display:flex;flex-direction:column;justify-content:end}.cat:nth-child(2){background:linear-gradient(135deg,#18394d,#111b25)}.cat:nth-child(3){background:linear-gradient(135deg,#354235,#141b18)}.cat:nth-child(4){background:linear-gradient(135deg,#4a2543,#20151f)}.cat b{font-size:17px}.cat span{font-size:12px;color:#d6dce0;margin-top:6px}
+.products{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.product{background:linear-gradient(145deg,#1b252d,#11171c);border:1px solid #35414a;border-radius:12px;overflow:hidden;min-width:0}.product-art{height:150px;display:grid;place-items:center;background:radial-gradient(circle at 50% 40%,#354653,#141a20 70%);font-size:64px}.product-body{padding:14px}.tag{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1.2px}.product h3{font-size:16px;margin:8px 0}.product p{font-size:12px;color:#bfc8ce;min-height:32px;line-height:1.45;margin:0 0 10px}.price{font-weight:900;font-size:17px;margin:8px 0 12px}.product-actions{display:flex;gap:7px}.product-actions .btn{padding:10px 8px;flex:1;font-size:12px}.details{background:#202c35;color:#fff}
+.info-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}.panel{border:1px solid #35414a;border-radius:12px;padding:20px;background:linear-gradient(145deg,#1b2730,#10161b)}.panel h3{margin:0 0 10px}.panel p,.panel li{color:#c5cdd2;font-size:13px;line-height:1.6}.panel ul{padding-left:18px}.order-form{display:grid;gap:10px}.order-form input,.order-form textarea,.order-form select{width:100%;padding:12px;border-radius:7px;border:1px solid #45525c;background:#0d1419;color:#fff}.order-form textarea{min-height:85px;resize:vertical}.notice{font-size:11px;color:#aeb8bf;line-height:1.5}
+footer{border-top:1px solid #303a42;padding:24px clamp(14px,3vw,38px);display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;color:#abb5bc;font-size:12px}
+.float-wa{position:fixed;right:18px;bottom:18px;z-index:12;background:#20c968;color:#04250f;border-radius:999px;padding:13px 17px;font-weight:900;box-shadow:0 8px 28px #0008}
+.modal{position:fixed;inset:0;z-index:30;background:#000b;display:none;place-items:center;padding:18px}.modal.open{display:grid}.modal-card{width:min(460px,100%);background:#152029;border:1px solid #4a5964;border-radius:14px;padding:22px}.modal-card h3{margin-top:0}.modal-card p{color:#c5cdd2;font-size:13px}.close{float:right;background:transparent;color:white;border:0;font-size:24px;cursor:pointer}
+@media(max-width:800px){nav a:not(.pill){display:none}.features{grid-template-columns:repeat(2,1fr)}.categories,.products{grid-template-columns:repeat(2,1fr)}.info-grid{grid-template-columns:1fr}.hero img{height:440px}.product-art{height:125px}}
+@media(max-width:420px){.products{gap:9px}.product-body{padding:10px}.product-art{height:105px;font-size:48px}.product-actions{flex-direction:column}.section{padding-top:25px;padding-bottom:25px}.hero-copy{right:18px}.features{gap:7px}.feature{padding:9px;font-size:11px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="#home"><span class="logo">C&N</span><span>C&N SHOPPING HALL<small>SHOP • PLAY • EXPLORE</small></span></a>
+  <nav><a href="#categories">Categories</a><a href="#products">Products</a><a href="#order">How to order</a><button class="pill" onclick="document.querySelector('#products').scrollIntoView({behavior:'smooth'})">Shop Now</button></nav>
+</header>
+<main>
+<section class="hero" id="home">
+  <img src="assets/cn-reference.png" alt="C&N Shopping Hall visual design reference">
+  <div class="hero-copy"><div class="eyebrow">YOUR VIRTUAL SHOPPING MALL</div><h1>C&N<br>SHOPPING HALL</h1><p>Shop • Play • Explore. Discover products across your favourite categories and place your order directly with us.</p><div class="actions"><a class="btn gold" href="#products">Explore Products</a><a class="btn ghost" href="#order">Order via WhatsApp ↗</a></div></div>
+</section>
+<div class="features">
+  <div class="feature"><span class="ico">🛍️</span><span><b>Shop Online</b><br>Browse products</span></div>
+  <div class="feature"><span class="ico">🛒</span><span><b>Easy Ordering</b><br>Cash on Delivery</span></div>
+  <div class="feature"><span class="ico">💬</span><span><b>WhatsApp Orders</b><br>Chat with our shop</span></div>
+  <div class="feature"><span class="ico">🎮</span><span><b>Play & Explore</b><br>Virtual mall concept</span></div>
+</div>
+<section class="section" id="categories"><div class="section-head"><div><h2>Explore the Mall</h2><p>Choose a department to discover products.</p></div></div>
+<div class="categories">
+<a class="cat" href="#products" onclick="filterProducts('Fashion')"><b>👗 Fashion</b><span>Clothing & accessories →</span></a>
+<a class="cat" href="#products" onclick="filterProducts('Electronics')"><b>📺 Electronics</b><span>Devices & technology →</span></a>
+<a class="cat" href="#products" onclick="filterProducts('Home & Living')"><b>🛋️ Home & Living</b><span>Comfort for your home →</span></a>
+<a class="cat" href="#products" onclick="filterProducts('Beauty & Health')"><b>🌸 Beauty & Health</b><span>Everyday care →</span></a>
+</div></section>
+<section class="section" id="products"><div class="section-head"><div><h2>Featured Products</h2><p>Sample items — replace these with your real products and prices before launch.</p></div><select id="filter" onchange="renderProducts()" style="max-width:180px;background:#111a20;color:white;border:1px solid #45525c;border-radius:7px;padding:10px"><option value="All">All categories</option><option>Fashion</option><option>Electronics</option><option>Home & Living</option><option>Beauty & Health</option></select></div>
+<div class="products" id="product-list"></div></section>
+<section class="section" id="order"><div class="section-head"><div><h2>Order from C&N</h2><p>Send an order request through WhatsApp. Payment method: Cash on Delivery, subject to confirmation.</p></div></div>
+<div class="info-grid"><div class="panel"><h3>🛒 How ordering works</h3><ul><li>Choose a product and select “Order on WhatsApp”.</li><li>WhatsApp opens with your product and price included.</li><li>Send your delivery details directly to C&N Shopping Hall.</li><li>We confirm availability, delivery fee and delivery time with you.</li></ul><p class="notice">This starter site sends order requests to WhatsApp. It does not automatically save orders to a private database or confirm stock.</p></div>
+<div class="panel"><h3>💬 Send an order request</h3><form class="order-form" id="order-form"><input id="customer-name" required placeholder="Your name"><input id="customer-phone" required type="tel" placeholder="Your contact number"><input id="customer-address" required placeholder="Delivery address"><select id="customer-product"><option value="">Choose a product</option></select><textarea id="customer-note" placeholder="Quantity / colour / additional details"></textarea><button class="pill" type="submit">Send order via WhatsApp</button></form><p class="notice">Your WhatsApp app or WhatsApp Web must be available to send the message.</p></div></div>
+</section>
+</main>
+<footer><span>© <span id="year"></span> C&N SHOPPING HALL</span><span>Shop • Play • Explore | Online order requests</span><span>Website starter — owner setup required before public launch</span></footer>
+<a class="float-wa" id="float-wa" href="#" target="_blank" rel="noopener">☏ WhatsApp</a>
+<div class="modal" id="modal" role="dialog" aria-modal="true"><div class="modal-card"><button class="close" onclick="closeModal()" aria-label="Close">×</button><div id="modal-content"></div></div></div>
+<script>
+const WHATSAPP_NUMBER = "94767054639"; // Sri Lanka country code + number without the leading 0
+const products = [
+{id:"001",name:"Classic T-Shirt",category:"Fashion",price:2500,icon:"👕",description:"Comfortable everyday cotton T-shirt."},
+{id:"002",name:'Smart TV 55"',category:"Electronics",price:65000,icon:"📺",description:"Sample listing for a television."},
+{id:"003",name:"Sofa Set",category:"Home & Living",price:120000,icon:"🛋️",description:"A comfortable centrepiece for your living room."},
+{id:"004",name:"Face Cream",category:"Beauty & Health",price:3500,icon:"🧴",description:"Sample personal-care product listing."}
+];
+const money = n => "Rs. " + Number(n).toLocaleString("en-LK");
+function waLink(message){return "https://wa.me/"+WHATSAPP_NUMBER+"?text="+encodeURIComponent(message)}
+function filterProducts(category){document.getElementById("filter").value=category;renderProducts()}
+function renderProducts(){
+ const f=document.getElementById("filter").value;
+ const list=products.filter(p=>f==="All"||p.category===f);
+ document.getElementById("product-list").innerHTML=list.map(p=>`<article class="product"><div class="product-art" aria-hidden="true">${p.icon}</div><div class="product-body"><span class="tag">${p.category}</span><h3>${p.name}</h3><p>${p.description}</p><div class="price">${money(p.price)}</div><div class="product-actions"><button class="btn details" onclick="showDetails('${p.id}')">View Details</button><a class="btn gold" target="_blank" rel="noopener" href="${waLink('Hello C&N Shopping Hall, I would like to order: '+p.name+' (Code: '+p.id+'), Price: '+money(p.price)+'. Please confirm availability and Cash on Delivery details.')}">Order Now</a></div></div></article>`).join("");
+ const select=document.getElementById("customer-product");select.innerHTML='<option value="">Choose a product</option>'+products.map(p=>`<option value="${p.id}">${p.name} — ${money(p.price)}</option>`).join("");
+}
+function showDetails(id){const p=products.find(x=>x.id===id);document.getElementById("modal-content").innerHTML=`<span class="tag">${p.category} · Code ${p.id}</span><h3>${p.name}</h3><div style="font-size:60px">${p.icon}</div><p>${p.description}</p><h2>${money(p.price)}</h2><p>Sample listing. Confirm availability with the seller before payment or delivery.</p><a class="btn gold" target="_blank" rel="noopener" href="${waLink('Hello C&N Shopping Hall, please share details for '+p.name+' (Code: '+p.id+'), listed at '+money(p.price)+'.')}">Ask about this product on WhatsApp</a>`;document.getElementById("modal").classList.add("open")}
+function closeModal(){document.getElementById("modal").classList.remove("open")}
+document.getElementById("order-form").addEventListener("submit",e=>{e.preventDefault();const p=products.find(x=>x.id===document.getElementById("customer-product").value);if(!p){alert("Please choose a product.");return}const msg=`C&N SHOPPING HALL — ORDER REQUEST\nName: ${document.getElementById("customer-name").value}\nCustomer phone: ${document.getElementById("customer-phone").value}\nDelivery address: ${document.getElementById("customer-address").value}\nProduct: ${p.name} (Code: ${p.id})\nListed price: ${money(p.price)}\nPayment: Cash on Delivery (please confirm)\nAdditional details: ${document.getElementById("customer-note").value||"None"}\nPlease confirm availability, delivery fee and delivery time.`;window.open(waLink(msg),"_blank","noopener")});
+document.getElementById("float-wa").href=waLink("Hello C&N Shopping Hall, I would like to ask about your products.");
+document.getElementById("year").textContent=new Date().getFullYear();
+document.getElementById("modal").addEventListener("click",e=>{if(e.target.id==="modal")closeModal()});
+renderProducts();
+</script>
+</body></html>
