@@ -1,130 +1,403 @@
 
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>C&N Shopping Hall 3D Mall</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>C&N SHOPPING HALL - 3D Mall</title>
+
 <style>
-body{margin:0;overflow:hidden;font-family:Arial;background:#101820;color:white}
-#hud{position:fixed;top:12px;left:12px;z-index:2;background:#101820dd;padding:14px;border-radius:12px}
-#hud h2{margin:0 0 8px;color:#e8bd58}
-#help{font-size:13px;line-height:1.7}
-#status{color:#e8bd58}
-canvas{display:block}
+*{box-sizing:border-box}
+body{
+  margin:0;overflow:hidden;
+  font-family:Arial,sans-serif;
+  background:#101820;color:white;
+  touch-action:none
+}
+canvas{display:block;width:100%;height:100%}
+#hud{
+  position:fixed;top:12px;left:12px;z-index:5;
+  background:rgba(12,22,34,.88);
+  border:1px solid rgba(232,189,88,.65);
+  border-radius:14px;padding:13px 16px;
+  box-shadow:0 5px 25px #0005;
+  pointer-events:none;max-width:calc(100% - 24px)
+}
+#hud h2{margin:0 0 6px;color:#f5cf72;font-size:19px}
+#hud p{margin:5px 0;font-size:12px;color:#d8e4ee}
+#status{color:#f5cf72!important}
+#mobile{
+  display:none;position:fixed;bottom:24px;left:0;right:0;
+  z-index:6;justify-content:space-between;
+  align-items:end;padding:0 22px;
+  pointer-events:none
+}
+.pad{display:grid;grid-template-columns:52px 52px 52px;grid-template-rows:52px 52px;gap:5px}
+.control{
+  border:1px solid #ffffff66;border-radius:15px;
+  background:#142536cc;color:white;font-size:23px;
+  display:flex;align-items:center;justify-content:center;
+  user-select:none;-webkit-user-select:none;
+  pointer-events:auto;touch-action:none
+}
+.control.active{background:#c99b36}
+#lookHint{
+  position:fixed;right:12px;top:12px;z-index:4;
+  background:#101820bb;border-radius:10px;
+  padding:9px;font-size:11px;color:#fff
+}
+@media(max-width:700px){
+  #mobile{display:flex}
+  #hud{top:8px;left:8px;padding:10px 12px}
+  #hud h2{font-size:15px}
+  #hud p{font-size:11px}
+  #lookHint{top:auto;bottom:145px;right:12px;font-size:10px}
+}
 </style>
 </head>
+
 <body>
+
 <div id="hud">
-<h2>C&N SHOPPING HALL</h2>
-<div>3D Shopping Mall</div>
-<div id="help">Move: W A S D / Arrow keys<br>Look: Mouse (click the mall)<br>Explore the shelves!</div>
-<p id="status">Welcome to the Mall!</p>
+  <h2>🏬 C&N SHOPPING HALL</h2>
+  <p>3D Shopping Experience</p>
+  <p>Explore our colourful mall!</p>
+  <p id="status">Welcome! Start exploring.</p>
 </div>
+
+<div id="lookHint">Drag screen to look around</div>
+
+<div id="mobile">
+  <div class="pad">
+    <div></div>
+    <div class="control" data-key="w">▲</div>
+    <div></div>
+    <div class="control" data-key="a">◀</div>
+    <div class="control" data-key="s">▼</div>
+    <div class="control" data-key="d">▶</div>
+  </div>
+  <div class="pad">
+    <div></div>
+    <div class="control" data-look="up">↑</div>
+    <div></div>
+    <div class="control" data-look="left">↶</div>
+    <div class="control" data-look="down">↓</div>
+    <div class="control" data-look="right">↷</div>
+  </div>
+</div>
+
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x9eb8c7);
-scene.fog = new THREE.Fog(0x9eb8c7, 25, 75);
+scene.background = new THREE.Color(0x9bbfd3);
+scene.fog = new THREE.Fog(0x9bbfd3, 35, 90);
 
-const camera = new THREE.PerspectiveCamera(70, innerWidth/innerHeight, 0.1, 1000);
-camera.position.set(0, 2, 9);
+const camera = new THREE.PerspectiveCamera(
+  70, innerWidth / innerHeight, 0.1, 150
+);
+camera.position.set(0, 2, 15);
 
-const renderer = new THREE.WebGLRenderer({antialias:true});
+const renderer = new THREE.WebGLRenderer({
+  antialias: true,
+  powerPreference: 'high-performance'
+});
 renderer.setSize(innerWidth, innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.15;
 document.body.appendChild(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xffffff, 0x46505a, 2));
-const light = new THREE.DirectionalLight(0xffffff, 2);
-light.position.set(0, 12, 5);
-light.castShadow = true;
-scene.add(light);
+scene.add(new THREE.HemisphereLight(0xe6f4ff, 0x66513d, 2.1));
 
-function box(w,h,d,x,y,z,color){
- const mesh = new THREE.Mesh(
-  new THREE.BoxGeometry(w,h,d),
-  new THREE.MeshStandardMaterial({color})
- );
- mesh.position.set(x,y,z);
- mesh.castShadow = true;
- mesh.receiveShadow = true;
- scene.add(mesh);
- return mesh;
+const sunlight = new THREE.DirectionalLight(0xffedce, 2.5);
+sunlight.position.set(-8, 15, 8);
+sunlight.castShadow = true;
+sunlight.shadow.mapSize.set(1024, 1024);
+sunlight.shadow.camera.left = -22;
+sunlight.shadow.camera.right = 22;
+sunlight.shadow.camera.top = 22;
+sunlight.shadow.camera.bottom = -22;
+scene.add(sunlight);
+
+const warmLight = new THREE.PointLight(0xffd18a, 45, 24);
+warmLight.position.set(0, 4, -4);
+scene.add(warmLight);
+
+function material(color, roughness=0.75, metalness=0){
+  return new THREE.MeshStandardMaterial({
+    color, roughness, metalness
+  });
 }
 
-box(28,0.4,38,0,-0.3,0,0xd6d1c5);
-box(28,0.5,0.5,0,5,-19,0x343f49);
-box(28,0.5,0.5,0,5,19,0x343f49);
-box(0.5,5,38,-14,2.2,0,0x64717a);
-box(0.5,5,38,14,2.2,0,0x64717a);
-box(28,0.4,38,0,5.1,0,0xf0e6cf);
-
-for(let x=-10;x<=10;x+=5){
- box(0.25,0.25,35,x,4.7,0,0xe8bd58);
+function box(w,h,d,x,y,z,color,options={}){
+  const mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(w,h,d),
+    material(color, options.roughness ?? 0.75,
+                    options.metalness ?? 0)
+  );
+  mesh.position.set(x,y,z);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+  scene.add(mesh);
+  return mesh;
 }
 
-const colors=[0xd65b49,0x3b91cf,0xe8bd58,0x54a66c,0x9c6bd1];
-for(let row=-1;row<=1;row++){
- const z=row*7;
- for(let x=-9;x<=9;x+=6){
-  box(3.2,3.1,1.2,x,1.55,z,0x76563b);
-  for(let y of [0.65,1.5,2.35]){
-   box(3.35,0.12,1.4,x,y,z,0xc8a77b);
-   for(let i=0;i<4;i++){
-    const c=colors[(i+Math.abs(x)+Math.abs(row))%colors.length];
-    box(0.45,0.48,0.45,x-1.1+i*0.72,y+0.3,z,c);
-   }
+function glowBox(w,h,d,x,y,z,color){
+  const mesh = box(w,h,d,x,y,z,color,{roughness:0.35});
+  mesh.material.emissive = new THREE.Color(color);
+  mesh.material.emissiveIntensity = 0.35;
+  return mesh;
+}
+
+// Mall floor
+box(28,0.4,38,0,-0.3,0,0xd8d2c5);
+box(28,0.08,38,0,-0.06,0,0xf0e6d7);
+
+// Decorative floor tiles
+for(let x=-12;x<=12;x+=3){
+  for(let z=-17;z<=17;z+=3){
+    box(2.92,0.018,2.92,x,-0.075,z,
+      ((x/3+z/3)%2===0)?0xe8e0d2:0xdcd2c1);
   }
- }
 }
 
-box(4,1.1,1.5,0,0.55,-15,0x263f4b);
-box(3.6,0.15,1.3,0,1.2,-15,0xe8bd58);
+// Mall walls
+box(28,5,0.5,0,2.2,-19,0xe4d9c6);
+box(0.5,5,38,-14,2.2,0,0x7a8b94);
+box(0.5,5,38,14,2.2,0,0x7a8b94);
 
+// Roof and golden ceiling strips
+box(28,0.4,38,0,5.1,0,0xf0e6cf);
+for(let x=-10;x<=10;x+=5){
+  box(0.18,0.12,35,x,4.82,0,0xd1a84c);
+}
+
+// Ceiling lamps
+for(let x=-10;x<=10;x+=5){
+  for(let z=-14;z<=14;z+=7){
+    glowBox(1.25,0.08,2.0,x,4.55,z,0xffedb5);
+    const lamp = new THREE.PointLight(0xffe2a3, 18, 10);
+    lamp.position.set(x,4.2,z);
+    scene.add(lamp);
+  }
+}
+
+// Back wall decorative panels
+for(let x=-11;x<=11;x+=4){
+  box(2.6,2.1,0.12,x,2.7,-18.68,0xc8b89f);
+  box(2.3,1.8,0.08,x,2.7,-18.58,0x536e7b);
+}
+
+// Main shop sign
+box(8,1.2,0.35,0,4.0,-18.1,0x172e40);
+glowBox(7.6,0.08,0.12,0,4.55,-17.88,0xf4c965);
+box(0.12,0.6,0.12,-3.65,4.0,-17.85,0xf4c965);
+box(0.12,0.6,0.12,3.65,4.0,-17.85,0xf4c965);
+
+// Store shelves and colourful merchandise
+const productColors=[
+  0xd64f49,0x3289c8,0xe8bd58,
+  0x4aab75,0x9d6bd2,0xf08a48,
+  0xe67aa5,0x70c7c2
+];
+
+let productCount=0;
+
+for(let row=-1;row<=1;row++){
+  const z=row*8;
+  for(let x=-9;x<=9;x+=6){
+    // Shelf body
+    box(3.2,3.1,1.2,x,1.55,z,0x785239);
+
+    // Shelf backing
+    box(3.05,2.8,0.12,x,1.6,z+0.57,0x49372d);
+
+    for(const y of [0.65,1.5,2.35]){
+      box(3.4,0.14,1.45,x,y,z,0xd0ae80);
+
+      for(let i=0;i<4;i++){
+        const c=productColors[
+          (i+Math.round(Math.abs(x))+Math.abs(row)*2)%productColors.length
+        ];
+
+        const px=x-1.12+i*0.74;
+        const height=0.38+(i%2)*0.12;
+
+        box(0.48,height,0.48,px,y+0.16+height/2,z-0.12,c);
+
+        // Product label
+        box(0.3,0.1,0.025,px,y+0.2,z-0.37,0xffffff);
+
+        productCount++;
+      }
+    }
+
+    // Shelf golden top trim
+    box(3.35,0.1,0.12,x,3.12,z-0.56,0xe8bd58);
+  }
+}
+
+// Main checkout counter
+box(4.5,1.1,1.5,0,0.55,-15,0x263f4b);
+box(4.7,0.12,1.7,0,1.15,-15,0xe8bd58);
+box(1.1,0.8,0.08,0,1.65,-14.4,0x263f4b);
+glowBox(0.75,0.15,0.08,0,1.68,-14.34,0x8de3be);
+
+// Decorative pillars
+for(const x of [-12,12]){
+  for(const z of [-13,0,13]){
+    box(0.65,4.5,0.65,x,2.1,z,0xe6d6b8);
+    box(0.9,0.18,0.9,x,4.3,z,0xd1a84c);
+    box(0.9,0.18,0.9,x,0.0,z,0xd1a84c);
+  }
+}
+
+// Entrance decorative arches
+box(0.25,3.6,0.25,-5,1.7,17,0xd3aa56);
+box(0.25,3.6,0.25,5,1.7,17,0xd3aa56);
+box(10.25,0.25,0.25,0,3.5,17,0xd3aa56);
+
+// Keyboard movement
 const keys={};
-addEventListener('keydown',e=>keys[e.key.toLowerCase()]=true);
-addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
 
-let yaw=0, pitch=0, locked=false;
-renderer.domElement.addEventListener('click',()=>{
- renderer.domElement.requestPointerLock?.();
+addEventListener('keydown',e=>{
+  keys[e.key.toLowerCase()]=true;
 });
-document.addEventListener('pointerlockchange',()=>{
- locked=document.pointerLockElement===renderer.domElement;
+addEventListener('keyup',e=>{
+  keys[e.key.toLowerCase()]=false;
 });
-document.addEventListener('mousemove',e=>{
- if(!locked)return;
- yaw-=e.movementX*0.002;
- pitch-=e.movementY*0.002;
- pitch=Math.max(-1,Math.min(1,pitch));
+addEventListener('blur',()=>{
+  for(const k in keys) keys[k]=false;
 });
+
+// Camera looking and movement
+let yaw=0;
+let pitch=0;
+let dragging=false;
+let lastX=0;
+let lastY=0;
+
+renderer.domElement.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='mouse'){
+    dragging=true;
+    lastX=e.clientX;
+    lastY=e.clientY;
+  }
+});
+
+addEventListener('pointerup',()=>dragging=false);
+
+renderer.domElement.addEventListener('pointermove',e=>{
+  if(e.pointerType==='touch'){
+    if(e.clientY<innerHeight*0.65 && e.clientX>innerWidth*0.28){
+      if(renderer.domElement.dataset.touching==='1'){
+        yaw-=(e.clientX-lastX)*0.005;
+        pitch-=(e.clientY-lastY)*0.004;
+        pitch=Math.max(-0.8,Math.min(0.8,pitch));
+      }
+      lastX=e.clientX;
+      lastY=e.clientY;
+      renderer.domElement.dataset.touching='1';
+    }
+    return;
+  }
+
+  if(!dragging)return;
+  yaw-=(e.clientX-lastX)*0.004;
+  pitch-=(e.clientY-lastY)*0.004;
+  pitch=Math.max(-0.8,Math.min(0.8,pitch));
+  lastX=e.clientX;
+  lastY=e.clientY;
+});
+
+renderer.domElement.addEventListener('pointerup',()=>{
+  renderer.domElement.dataset.touching='0';
+});
+renderer.domElement.addEventListener('pointercancel',()=>{
+  renderer.domElement.dataset.touching='0';
+});
+
+// Mobile buttons
+document.querySelectorAll('[data-key]').forEach(button=>{
+  const key=button.dataset.key;
+
+  const start=e=>{
+    e.preventDefault();
+    keys[key]=true;
+    button.classList.add('active');
+  };
+
+  const stop=e=>{
+    e.preventDefault();
+    keys[key]=false;
+    button.classList.remove('active');
+  };
+
+  button.addEventListener('pointerdown',start);
+  button.addEventListener('pointerup',stop);
+  button.addEventListener('pointercancel',stop);
+  button.addEventListener('lostpointercapture',stop);
+});
+
+document.querySelectorAll('[data-look]').forEach(button=>{
+  const direction=button.dataset.look;
+  const turn=()=>{
+    if(direction==='left')yaw+=0.15;
+    if(direction==='right')yaw-=0.15;
+    if(direction==='up')pitch=Math.min(0.8,pitch+0.1);
+    if(direction==='down')pitch=Math.max(-0.8,pitch-0.1);
+  };
+
+  button.addEventListener('pointerdown',e=>{
+    e.preventDefault();
+    turn();
+  });
+});
+
+// Main animation loop
+const status=document.getElementById('status');
 
 function animate(){
- requestAnimationFrame(animate);
- const speed=0.12;
- const forward=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0);
- const side=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0);
- camera.position.x+=(-Math.sin(yaw)*forward+Math.cos(yaw)*side)*speed;
- camera.position.z+=(-Math.cos(yaw)*forward-Math.sin(yaw)*side)*speed;
- camera.position.x=Math.max(-12,Math.min(12,camera.position.x));
- camera.position.z=Math.max(-17,Math.min(17,camera.position.z));
- camera.position.y=2;
- camera.rotation.order='YXZ';
- camera.rotation.y=yaw;
- camera.rotation.x=pitch;
- document.getElementById('status').textContent=
- 'Explore the Mall | Position: '+camera.position.x.toFixed(1)+', '+camera.position.z.toFixed(1);
- renderer.render(scene,camera);
+  requestAnimationFrame(animate);
+
+  const speed=0.105;
+  const forward=
+    (keys.w||keys.arrowup?1:0)-
+    (keys.s||keys.arrowdown?1:0);
+  const side=
+    (keys.d||keys.arrowright?1:0)-
+    (keys.a||keys.arrowleft?1:0);
+
+  camera.position.x+=
+    (-Math.sin(yaw)*forward+Math.cos(yaw)*side)*speed;
+
+  camera.position.z+=
+    (-Math.cos(yaw)*forward-Math.sin(yaw)*side)*speed;
+
+  camera.position.x=Math.max(-12,Math.min(12,camera.position.x));
+  camera.position.z=Math.max(-17,Math.min(17,camera.position.z));
+  camera.position.y=2;
+
+  camera.rotation.order='YXZ';
+  camera.rotation.y=yaw;
+  camera.rotation.x=pitch;
+
+  status.textContent='Explore the Mall | Products: '+productCount;
+
+  renderer.render(scene,camera);
 }
+
 animate();
 
 addEventListener('resize',()=>{
- camera.aspect=innerWidth/innerHeight;
- camera.updateProjectionMatrix();
- renderer.setSize(innerWidth,innerHeight);
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
 });
 </script>
 </body>
