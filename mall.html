@@ -1,307 +1,368 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="si">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>C&N SHOPPING HALL 3D</title>
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#aebbc5;font-family:Arial,sans-serif;touch-action:none}
-#game{position:fixed;inset:0}
-canvas{display:block}
-#brand{position:fixed;top:12px;left:12px;color:white;background:#102332e8;border:1px solid #ffffff38;border-radius:10px;padding:11px 15px;pointer-events:none}
-#brand strong{letter-spacing:1px;font-size:16px}
-#brand small{display:block;color:#c6d5df;margin-top:5px;font-size:10px}
-#help{position:fixed;top:12px;right:12px;padding:10px 12px;background:#102332d9;color:white;border-radius:9px;font-size:12px;line-height:1.7;pointer-events:none}
-#status{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);padding:8px 13px;border-radius:20px;background:#102332e8;color:white;font-size:12px;white-space:nowrap}
-#loading{position:fixed;inset:0;z-index:9;background:#15232d;display:flex;align-items:center;justify-content:center;color:white;text-align:center;padding:24px}
-#loading h1{font-size:25px;letter-spacing:2px}
-#loading p{color:#d5e0e7;line-height:1.7}
-#pad{position:fixed;bottom:25px;left:18px;display:grid;grid-template-columns:50px 50px 50px;grid-template-rows:50px 50px;gap:5px}
-.ctrl{border:1px solid #ffffff70;border-radius:13px;background:#142a3be0;color:white;font-size:22px;touch-action:none;user-select:none;-webkit-user-select:none}
-#up{grid-column:2;grid-row:1}#left{grid-column:1;grid-row:2}#down{grid-column:2;grid-row:2}#right{grid-column:3;grid-row:2}
-#look{display:none;position:fixed;right:15px;bottom:30px;width:115px;height:115px;border:1px solid #ffffff75;border-radius:50%;background:#10233238;color:white;align-items:center;justify-content:center;font-size:11px;touch-action:none}
-@media(pointer:coarse){#look{display:flex}#help{max-width:155px;font-size:10px}}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#bbc5c8;font-family:Arial,sans-serif}
+canvas{display:block;touch-action:none}
+#title{position:fixed;top:14px;left:14px;z-index:5;color:white;background:#172a30e8;padding:12px 16px;border-radius:9px;font-weight:bold;letter-spacing:1px;pointer-events:none}
+#help{position:fixed;top:70px;left:14px;z-index:5;color:white;background:#172a30d9;padding:10px 12px;border-radius:8px;font-size:12px;line-height:1.7;pointer-events:none}
+#status{position:fixed;top:14px;right:14px;background:#172a30e8;color:white;padding:10px;border-radius:8px;font-size:12px;z-index:5}
+#reset{position:fixed;right:14px;top:60px;z-index:5;padding:10px 12px;border:0;border-radius:8px;background:#e7e9e5;color:#172a30}
+#pad{display:none;position:fixed;bottom:16px;left:12px;z-index:5;grid-template-columns:48px 48px 48px;gap:5px}
+#pad button{height:46px;border:1px solid #ffffff66;border-radius:10px;background:#172a30dc;color:white;font-size:20px;touch-action:none}
+#pad .up{grid-column:2}
+#pad .left{grid-column:1}
+#pad .down{grid-column:2}
+#pad .right{grid-column:3}
+@media(pointer:coarse){#pad{display:grid}#help{max-width:210px;font-size:11px}}
 </style>
 </head>
 <body>
-<div id="game"></div>
-<div id="brand"><strong>C&N SHOPPING HALL</strong><small>3D SUPERMARKET EXPERIENCE</small></div>
-<div id="help">W A S D / Arrow keys: Move<br>Mouse drag: Look around<br>Mobile: Buttons + drag</div>
-<div id="status">Loading supermarket...</div>
-<div id="loading"><div><h1>C&N SHOPPING HALL</h1><p>Loading the 3D supermarket and character.<br>Please wait while the models load.</p></div></div>
-<div id="pad">
-<button class="ctrl" id="up" aria-label="Move forward">▲</button>
-<button class="ctrl" id="left" aria-label="Move left">◀</button>
-<button class="ctrl" id="down" aria-label="Move backward">▼</button>
-<button class="ctrl" id="right" aria-label="Move right">▶</button>
+<div id="title">C&N SHOPPING HALL</div>
+<div id="help">
+W / S — ඉදිරියට සහ පසුපසට<br>
+A / D — දෙපැත්තට ඇවිදින්න<br>
+Mouse drag — වටපිට බලන්න<br>
+Shift — වේගයෙන් ඇවිදින්න
 </div>
-<div id="look">DRAG TO LOOK</div>
+<div id="status">3D SUPERMARKET</div>
+<button id="reset">මුලට යන්න</button>
+<div id="pad">
+<button class="up" data-key="KeyW">▲</button>
+<button class="left" data-key="KeyA">◀</button>
+<button class="down" data-key="KeyS">▼</button>
+<button class="right" data-key="KeyD">▶</button>
+</div>
 
-<script type="importmap">
-{
- "imports":{
-  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
- }
-}
-</script>
 <script type="module">
-import * as THREE from 'three';
-import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import * as THREE from
+'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 
-const game=document.querySelector('#game');
-const status=document.querySelector('#status');
-const loading=document.querySelector('#loading');
+import {GLTFLoader} from
+'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
 
-const scene=new THREE.Scene();
-scene.background=new THREE.Color(0xb7c5ce);
-scene.fog=new THREE.Fog(0xb7c5ce,48,105);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xbac8cc);
+scene.fog = new THREE.Fog(0xbac8cc, 40, 100);
 
-const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,180);
-const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+const camera = new THREE.PerspectiveCamera(
+ 65, innerWidth/innerHeight, 0.1, 150
+);
+
+const renderer = new THREE.WebGLRenderer({
+ antialias:true,
+ powerPreference:'high-performance'
+});
+
 renderer.setSize(innerWidth,innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
 renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure=1.15;
-game.appendChild(renderer.domElement);
+document.body.appendChild(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xeaf4ff,0x635747,2.0));
+const mat=(color,roughness=0.7,metalness=0)=>
+ new THREE.MeshStandardMaterial({color,roughness,metalness});
 
-const sun=new THREE.DirectionalLight(0xfff0d9,2.7);
-sun.position.set(-15,24,12);
-sun.castShadow=true;
-sun.shadow.mapSize.set(2048,2048);
-sun.shadow.camera.left=-36;
-sun.shadow.camera.right=36;
-sun.shadow.camera.top=40;
-sun.shadow.camera.bottom=-40;
-scene.add(sun);
+const concrete=mat(0xd0d4d1,0.3,0.08);
+const wallmat=mat(0xe5e8e4,0.8);
+const ceilingmat=mat(0xf0f1ed,0.8);
+const steel=mat(0x68767b,0.32,0.78);
+const steelDark=mat(0x39474c,0.4,0.72);
+const shelfmat=mat(0xaeb8b9,0.4,0.55);
+const trim=mat(0xf2f1e9,0.4,0.1);
 
-function material(color,roughness=.6,metalness=0){
- return new THREE.MeshStandardMaterial({color,roughness,metalness});
-}
-const concrete=material(0x858d92,.35,.12);
-const wall=material(0xd9dfe1,.85);
-const metal=material(0x8c9aa2,.3,.82);
-const frame=material(0x46545d,.38,.72);
-const shelfSurface=material(0xc3cbd0,.4,.58);
-const dark=material(0x24333b,.48,.4);
-const white=material(0xf1f3f4,.3,.15);
-const gold=material(0xe2b654,.36,.35);
-
-function addBox(w,h,d,mat,x,y,z,shadow=true){
- const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
- m.position.set(x,y,z);
- m.castShadow=shadow;
- m.receiveShadow=true;
- scene.add(m);
- return m;
-}
-
-// Large tiled floor
-addBox(64,.2,86,concrete,0,-.18,-9,false);
-const grout=material(0xaeb4b7,.8);
-for(let x=-31;x<=31;x+=2){
- addBox(.018,.008,84,grout,x,-.075,-9,false);
-}
-for(let z=-51;z<=33;z+=2){
- addBox(64,.008,.018,grout,0,-.073,z,false);
-}
-
-// Store walls and roof beams
-addBox(64,8,.5,wall,0,4,-52,false);
-addBox(.5,8,86,wall,-32,4,-9,false);
-addBox(.5,8,86,wall,32,4,-9,false);
-for(let x=-28;x<=28;x+=7){
- addBox(.15,.18,84,frame,x,7.4,-9,false);
-}
-for(let z=-45;z<=25;z+=14){
- addBox(63,.12,.2,frame,0,7.15,z,false);
-}
-
-// Main store sign
-addBox(19,1.7,.16,dark,0,6.1,-51.7,false);
-function makeText(text,width,height,color){
- const c=document.createElement('canvas');
- c.width=1024;c.height=256;
- const ctx=c.getContext('2d');
- ctx.clearRect(0,0,c.width,c.height);
- ctx.fillStyle=color;
- ctx.font='bold 88px Arial';
- ctx.textAlign='center';
- ctx.textBaseline='middle';
- ctx.fillText(text,512,128);
- const tex=new THREE.CanvasTexture(c);
- tex.colorSpace=THREE.SRGBColorSpace;
- const m=new THREE.Mesh(
-  new THREE.PlaneGeometry(width,height),
-  new THREE.MeshBasicMaterial({map:tex,transparent:true,side:THREE.DoubleSide})
+function box(parent,w,h,d,x,y,z,material,shadows=true){
+ const mesh=new THREE.Mesh(
+  new THREE.BoxGeometry(w,h,d),material
  );
- return m;
-}
-const sign=makeText('C&N SHOPPING HALL',17,1.65,'#ffffff');
-sign.position.set(0,6.1,-51.59);
-scene.add(sign);
-
-// Realistic-looking metal shelving with empty shelves
-function createRack(cx,cz,length=22){
- const rack=new THREE.Group();
- rack.position.set(cx,0,cz);
- scene.add(rack);
- const w=2.3,h=3.25;
- const levels=[.38,1.02,1.66,2.30,2.94];
-
- // Tall metal posts
- for(const x of [-w/2,w/2]){
-  for(const z of [-length/2,length/2]){
-   const p=new THREE.Mesh(new THREE.BoxGeometry(.075,h,.075),metal);
-   p.position.set(x,h/2,z);
-   p.castShadow=true;
-   rack.add(p);
-  }
-  // Long structural rails
-  for(const y of [.35,.98,1.61,2.24,2.87]){
-   const rail=new THREE.Mesh(new THREE.BoxGeometry(.045,.045,length),frame);
-   rail.position.set(x,y,0);
-   rack.add(rail);
-  }
- }
-
- // Shelf decks
- for(const y of levels){
-  const deck=new THREE.Mesh(new THREE.BoxGeometry(w,.075,length),shelfSurface);
-  deck.position.set(0,y,0);
-  deck.castShadow=true;
-  deck.receiveShadow=true;
-  rack.add(deck);
-
-  // Front and back lips
-  for(const z of [-length/2,length/2]){
-   const lip=new THREE.Mesh(new THREE.BoxGeometry(w,.09,.045),metal);
-   lip.position.set(0,y+.045,z);
-   rack.add(lip);
-  }
- }
-
- // Back panels and perforation details
- for(let z=-length/2+.5;z<length/2;z+=.65){
-  const panel=new THREE.Mesh(new THREE.BoxGeometry(w-.08,.5,.025),frame);
-  panel.position.set(0,1.8,z);
-  rack.add(panel);
-  for(let y=1.61;y<=2.03;y+=.14){
-   const hole=new THREE.Mesh(new THREE.BoxGeometry(w-.22,.012,.03),metal);
-   hole.position.set(0,y,z+.018);
-   rack.add(hole);
-  }
- }
-
- // Diagonal side braces
- for(const z of [-length/2+.2,length/2-.2]){
-  for(const x of [-w/2,w/2]){
-   const brace=new THREE.Mesh(new THREE.BoxGeometry(.045,2.6,.045),metal);
-   brace.position.set(x,1.6,z);
-   brace.rotation.z=x<0?-.12:.12;
-   rack.add(brace);
-  }
- }
- return rack;
+ mesh.position.set(x,y,z);
+ mesh.castShadow=shadows;
+ mesh.receiveShadow=true;
+ parent.add(mesh);
+ return mesh;
 }
 
-// Six long rack rows with wide walkways
-[-22,-15,-8,8,15,22].forEach(x=>createRack(x,-15,25));
+scene.add(new THREE.HemisphereLight(0xf1f7ff,0x7b8581,2));
 
-// Short cross-aisle shelving at the rear
-createRack(-11.5,-.8,2.4);
-createRack(11.5,-.8,2.4);
+const sunlight=new THREE.DirectionalLight(0xfff4df,2.3);
+sunlight.position.set(-10,18,10);
+sunlight.castShadow=true;
+sunlight.shadow.mapSize.set(1024,1024);
+sunlight.shadow.camera.left=-25;
+sunlight.shadow.camera.right=25;
+sunlight.shadow.camera.top=30;
+sunlight.shadow.camera.bottom=-30;
+scene.add(sunlight);
 
-// Entrance counter
-addBox(11,.85,1.2,dark,0,.43,20);
-addBox(11,.12,1.3,white,0,.92,20);
-addBox(11,.045,.06,gold,0,.99,19.35,false);
+// SUPERMARKET FLOOR
+box(scene,40,0.3,90,0,-0.17,-31,concrete,false);
 
-// Overhead LED light fixtures
-const lampMaterial=new THREE.MeshStandardMaterial({
- color:0xffffff,emissive:0xffffff,emissiveIntensity:1.2,roughness:.3
-});
-for(let x=-25;x<=25;x+=10){
- for(let z=-43;z<=20;z+=12){
-  addBox(3.2,.12,.72,frame,x,6.85,z,false);
-  addBox(2.9,.045,.52,lampMaterial,x,6.77,z,false);
-  const light=new THREE.PointLight(0xfff2df,36,17,2);
-  light.position.set(x,6.55,z);
+// Large tiles
+const grout=mat(0xaab3b2,0.85);
+for(let x=-19;x<=19;x+=2){
+ box(scene,0.018,0.006,88,x,0.001,-31,grout,false);
+}
+for(let z=13;z>=-75;z-=2){
+ box(scene,39,0.006,0.018,0,0.002,z,grout,false);
+}
+
+// WALLS
+box(scene,40,8,0.3,0,4,-76,wallmat);
+box(scene,0.3,8,90,-20,4,-31,wallmat);
+box(scene,0.3,8,90,20,4,-31,wallmat);
+
+// CEILING
+box(scene,40,0.35,90,0,7.4,-31,ceilingmat,false);
+
+for(let z=12;z>=-72;z-=7){
+ box(scene,39,0.13,0.18,0,7.15,z,trim,false);
+
+ for(const x of [-14,-7,0,7,14]){
+  box(scene,2.8,0.08,0.65,x,7.08,z-1,trim,false);
+
+  const light=new THREE.PointLight(0xfff2db,28,13,2);
+  light.position.set(x,6.6,z-1);
   scene.add(light);
  }
 }
 
-// Entrance pillars
-for(const x of [-9,9]){
- addBox(.35,4,.35,metal,x,2,24);
- addBox(1.2,.18,.8,white,x,4.08,24);
+// METAL SHELVES
+// Long, empty supermarket shelving with realistic metal supports.
+function makeShelfRun(x,z1,z2){
+ const group=new THREE.Group();
+ scene.add(group);
+
+ const length=Math.abs(z2-z1);
+ const center=(z1+z2)/2;
+
+ // central backbone
+ box(group,0.12,3.5,length,x,1.8,center,steelDark);
+
+ for(const side of [-1,1]){
+  const faceX=x+side*0.56;
+
+  // Metal vertical uprights
+  for(const offset of [-0.98,0.98]){
+   box(group,0.075,3.55,0.09,
+       x+offset,1.8,z1,steel);
+   box(group,0.075,3.55,0.09,
+       x+offset,1.8,z2,steel);
+  }
+
+  // Empty steel shelves and front lips
+  for(const y of [0.42,1.12,1.82,2.52,3.2]){
+   box(group,1.95,0.075,length,
+       faceX,y,center,shelfmat);
+
+   box(group,1.95,0.065,length,
+       faceX,y+0.055,center,steel);
+
+   box(group,1.95,0.055,length,
+       faceX,y-0.075,center,trim,false);
+
+   // Small mounting brackets
+   for(const z of [z1,z2]){
+    box(group,0.11,0.11,0.13,
+        faceX,y,z,steelDark);
+   }
+  }
+ }
+
+ // End frames
+ for(const z of [z1,z2]){
+  box(group,2,0.09,0.12,x,3.52,z,steelDark);
+  box(group,2,0.09,0.12,x,0.25,z,steelDark);
+ }
 }
 
-// Character holder
+// Five long rows with clear walking aisles.
+for(const x of [-12,-6,0,6,12]){
+ makeShelfRun(x,12,-69);
+}
+
+// Entrance and rear architectural details
+box(scene,16,0.15,0.2,0,4.2,14,steelDark,false);
+
+for(const x of [-8,-4,0,4,8]){
+ box(scene,0.09,3.8,0.1,x,1.9,14,steel,false);
+}
+
+// Store sign
+function signTexture(){
+ const canvas=document.createElement('canvas');
+ canvas.width=1024;
+ canvas.height=256;
+ const ctx=canvas.getContext('2d');
+
+ ctx.fillStyle='#234b4c';
+ ctx.fillRect(0,0,1024,256);
+
+ ctx.fillStyle='#e6c780';
+ ctx.fillRect(0,0,1024,9);
+ ctx.fillRect(0,247,1024,9);
+
+ ctx.fillStyle='#fff9e9';
+ ctx.font='bold 76px Arial';
+ ctx.textAlign='center';
+ ctx.textBaseline='middle';
+ ctx.fillText('C&N SHOPPING HALL',512,130);
+
+ const texture=new THREE.CanvasTexture(canvas);
+ texture.colorSpace=THREE.SRGBColorSpace;
+ return texture;
+}
+
+const sign=new THREE.Mesh(
+ new THREE.PlaneGeometry(12,3),
+ new THREE.MeshBasicMaterial({
+  map:signTexture(),
+  toneMapped:false
+ })
+);
+sign.position.set(0,5.2,13.7);
+scene.add(sign);
+
+// HUMAN CHARACTER
+// A procedural articulated human is used as a fallback.
+// The model is not a photorealistic scanned human.
+
 const player=new THREE.Group();
 scene.add(player);
-player.position.set(0,0,28);
+player.position.set(0,0,7);
 
-let mixer=null;
-let idleAction=null;
-let walkAction=null;
-let activeAction=null;
-let characterReady=false;
+const human=new THREE.Group();
+player.add(human);
 
-function playAction(action){
- if(!action||activeAction===action)return;
- action.reset().fadeIn(.2).play();
- if(activeAction)activeAction.fadeOut(.2);
- activeAction=action;
+const skin=mat(0xc58e69,0.82);
+const hair=mat(0x30241f,0.9);
+const shirt=mat(0x347c83,0.78);
+const pants=mat(0x26384b,0.8);
+const shoes=mat(0x25292a,0.55);
+const white=mat(0xf0e9dc,0.6);
+const eye=mat(0x201b18,0.5);
+
+function sphere(parent,x,y,z,sx,sy,sz,material){
+ const mesh=new THREE.Mesh(
+  new THREE.SphereGeometry(1,20,16),material
+ );
+ mesh.position.set(x,y,z);
+ mesh.scale.set(sx,sy,sz);
+ mesh.castShadow=true;
+ mesh.receiveShadow=true;
+ parent.add(mesh);
+ return mesh;
 }
 
-const loader=new GLTFLoader();
-loader.load(
- 'https://threejs.org/examples/models/gltf/Soldier.glb',
- gltf=>{
-  const model=gltf.scene;
-  model.scale.setScalar(1.05);
-  model.traverse(o=>{
-   if(o.isMesh){
-    o.castShadow=true;
-    o.receiveShadow=true;
-   }
-  });
-  player.add(model);
+function limb(parent,topRadius,bottomRadius,height,material){
+ const mesh=new THREE.Mesh(
+  new THREE.CylinderGeometry(
+   topRadius,bottomRadius,height,16
+  ),material
+ );
+ mesh.position.y=-height/2;
+ mesh.castShadow=true;
+ mesh.receiveShadow=true;
+ parent.add(mesh);
+ return mesh;
+}
 
-  mixer=new THREE.AnimationMixer(model);
-  for(const clip of gltf.animations){
-   const action=mixer.clipAction(clip);
-   if(clip.name.toLowerCase().includes('walk'))walkAction=action;
-   if(clip.name.toLowerCase().includes('idle'))idleAction=action;
-  }
-  if(!idleAction&&gltf.animations.length)idleAction=mixer.clipAction(gltf.animations[0]);
-  playAction(idleAction);
-  characterReady=true;
-  loading.style.display='none';
-  status.textContent='Ready — use the controls to walk';
- },
- undefined,
- error=>{
-  console.error('Character model failed to load:',error);
-  loading.querySelector('p').textContent=
-   'The 3D character could not load. Check your internet connection and reload.';
-  status.textContent='Character model failed to load';
- }
-);
+// torso
+sphere(human,0,1.28,0,0.30,0.43,0.19,shirt);
 
-// Camera orientation
+// neck
+sphere(human,0,1.77,0,0.09,0.13,0.09,skin);
+
+// head
+sphere(human,0,2.02,0,0.205,0.26,0.19,skin);
+
+// hair cap and back hair
+sphere(human,0,2.22,0.015,0.215,0.12,0.2,hair);
+sphere(human,0,2.08,0.12,0.19,0.14,0.10,hair);
+
+// ears
+sphere(human,-0.207,2.03,0,0.04,0.065,0.045,skin);
+sphere(human,0.207,2.03,0,0.04,0.065,0.045,skin);
+
+// Eyes face toward the front (-Z)
+for(const x of [-0.07,0.07]){
+ sphere(human,x,2.06,-0.174,0.027,0.026,0.015,white);
+ sphere(human,x,2.06,-0.188,0.012,0.016,0.008,eye);
+}
+
+// nose
+sphere(human,0,2.01,-0.2,0.026,0.042,0.03,skin);
+
+// arms
+const arms=[];
+for(const side of [-1,1]){
+ const arm=new THREE.Group();
+ arm.position.set(side*0.34,1.56,0);
+ human.add(arm);
+ arms.push(arm);
+
+ limb(arm,0.105,0.085,0.36,shirt);
+
+ const forearm=new THREE.Group();
+ forearm.position.y=-0.36;
+ arm.add(forearm);
+
+ limb(forearm,0.075,0.055,0.34,skin);
+ sphere(forearm,0,-0.36,-0.015,0.065,0.085,0.055,skin);
+}
+
+// legs
+const legs=[];
+for(const side of [-1,1]){
+ const leg=new THREE.Group();
+ leg.position.set(side*0.15,0.93,0);
+ human.add(leg);
+ legs.push(leg);
+
+ limb(leg,0.13,0.095,0.43,pants);
+
+ const lower=new THREE.Group();
+ lower.position.y=-0.43;
+ leg.add(lower);
+
+ limb(lower,0.09,0.065,0.37,pants);
+
+ // shoes point forward
+ const foot=new THREE.Mesh(
+  new THREE.BoxGeometry(0.19,0.12,0.31),shoes
+ );
+ foot.position.set(0,-0.38,-0.07);
+ foot.castShadow=true;
+ lower.add(foot);
+
+ leg.userData.lower=lower;
+}
+
+// camera and controls
 let yaw=0;
-let pitch=.18;
+let pitch=-0.1;
 let dragging=false;
-let lastX=0,lastY=0;
+let lastX=0;
+let lastY=0;
+const keys=new Set();
+
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+window.addEventListener('keydown',e=>{
+ if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)){
+  e.preventDefault();
+ }
+ keys.add(e.code);
+});
+
+window.addEventListener('keyup',e=>keys.delete(e.code));
+window.addEventListener('blur',()=>keys.clear());
 
 renderer.domElement.addEventListener('pointerdown',e=>{
  dragging=true;
@@ -309,118 +370,144 @@ renderer.domElement.addEventListener('pointerdown',e=>{
  lastY=e.clientY;
  renderer.domElement.setPointerCapture(e.pointerId);
 });
+
 renderer.domElement.addEventListener('pointermove',e=>{
  if(!dragging)return;
- yaw-=(e.clientX-lastX)*.005;
- pitch=THREE.MathUtils.clamp(pitch-(e.clientY-lastY)*.004,-.15,.75);
+
+ const dx=e.clientX-lastX;
+ const dy=e.clientY-lastY;
+
+ yaw-=dx*0.004;
+ pitch=clamp(pitch-dy*0.003,-0.65,0.45);
+
  lastX=e.clientX;
  lastY=e.clientY;
 });
-function endDrag(){dragging=false}
-renderer.domElement.addEventListener('pointerup',endDrag);
-renderer.domElement.addEventListener('pointercancel',endDrag);
 
-// Keyboard controls
-const keys=Object.create(null);
-addEventListener('keydown',e=>{
- const k=e.key.toLowerCase();
- keys[k]=true;
- if(k.startsWith('arrow'))e.preventDefault();
-});
-addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
-addEventListener('blur',()=>Object.keys(keys).forEach(k=>keys[k]=false));
+renderer.domElement.addEventListener('pointerup',()=>dragging=false);
+renderer.domElement.addEventListener('pointercancel',()=>dragging=false);
 
-// Touch movement buttons
-const buttonKeys={up:'w',down:'s',left:'a',right:'d'};
-for(const [id,key] of Object.entries(buttonKeys)){
- const b=document.getElementById(id);
- b.addEventListener('pointerdown',e=>{
+// Mobile movement buttons
+document.querySelectorAll('[data-key]').forEach(button=>{
+ const key=button.dataset.key;
+
+ button.addEventListener('pointerdown',e=>{
   e.preventDefault();
-  keys[key]=true;
-  b.setPointerCapture(e.pointerId);
+  keys.add(key);
  });
- const release=()=>keys[key]=false;
- b.addEventListener('pointerup',release);
- b.addEventListener('pointercancel',release);
- b.addEventListener('lostpointercapture',release);
+
+ const stop=()=>{
+  keys.delete(key);
+ };
+
+ button.addEventListener('pointerup',stop);
+ button.addEventListener('pointercancel',stop);
+ button.addEventListener('pointerleave',stop);
+});
+
+function cameraUpdate(){
+ const target=new THREE.Vector3(
+  player.position.x,
+  player.position.y+1.55,
+  player.position.z
+ );
+
+ const distance=4.3;
+ const horizontal=Math.cos(pitch)*distance;
+
+ camera.position.set(
+  target.x+Math.sin(yaw)*horizontal,
+  target.y+Math.sin(pitch)*distance,
+  target.z+Math.cos(yaw)*horizontal
+ );
+
+ camera.lookAt(
+  target.x-Math.sin(yaw)*2.5,
+  target.y+Math.sin(pitch)*1.2,
+  target.z-Math.cos(yaw)*2.5
+ );
 }
 
-// Dedicated mobile look pad
-const look=document.getElementById('look');
-let looking=false,lookX=0,lookY=0;
-look.addEventListener('pointerdown',e=>{
- looking=true;
- lookX=e.clientX;
- lookY=e.clientY;
- look.setPointerCapture(e.pointerId);
+document.querySelector('#reset').addEventListener('click',()=>{
+ player.position.set(0,0,7);
+ yaw=0;
+ pitch=-0.1;
 });
-look.addEventListener('pointermove',e=>{
- if(!looking)return;
- yaw-=(e.clientX-lookX)*.008;
- pitch=THREE.MathUtils.clamp(pitch-(e.clientY-lookY)*.006,-.15,.75);
- lookX=e.clientX;
- lookY=e.clientY;
-});
-look.addEventListener('pointerup',()=>looking=false);
-look.addEventListener('pointercancel',()=>looking=false);
 
-// Movement and third-person camera
 const clock=new THREE.Clock();
-const move=new THREE.Vector3();
-const forward=new THREE.Vector3();
-const side=new THREE.Vector3();
-const target=new THREE.Vector3();
+let time=0;
 
 function animate(){
  requestAnimationFrame(animate);
- const dt=Math.min(clock.getDelta(),.05);
- if(mixer)mixer.update(dt);
 
- const forwardPressed=keys.w||keys.arrowup;
- const backPressed=keys.s||keys.arrowdown;
- const leftPressed=keys.a||keys.arrowleft;
- const rightPressed=keys.d||keys.arrowright;
+ const dt=Math.min(clock.getDelta(),0.04);
+ time+=dt;
 
- move.set(0,0,0);
- forward.set(-Math.sin(yaw),0,-Math.cos(yaw));
- side.set(Math.cos(yaw),0,-Math.sin(yaw));
+ let forward=0;
+ let side=0;
 
- if(forwardPressed)move.add(forward);
- if(backPressed)move.sub(forward);
- if(rightPressed)move.add(side);
- if(leftPressed)move.sub(side);
+ if(keys.has('KeyW')||keys.has('ArrowUp'))forward++;
+ if(keys.has('KeyS')||keys.has('ArrowDown'))forward--;
+ if(keys.has('KeyA')||keys.has('ArrowLeft'))side--;
+ if(keys.has('KeyD')||keys.has('ArrowRight'))side++;
 
- const moving=move.lengthSq()>0;
+ const moving=forward!==0||side!==0;
 
  if(moving){
-  move.normalize();
-  player.position.addScaledVector(move,4*dt);
-  player.rotation.y=Math.atan2(move.x,move.z);
-  player.position.x=THREE.MathUtils.clamp(player.position.x,-29,29);
-  player.position.z=THREE.MathUtils.clamp(player.position.z,-49,31);
-  playAction(walkAction||idleAction);
- }else{
-  playAction(idleAction);
+  const length=Math.hypot(forward,side);
+  forward/=length;
+  side/=length;
+
+  const speed=(
+   keys.has('ShiftLeft')||keys.has('ShiftRight')
+  )?4.2:2.5;
+
+  const dx=(
+   Math.sin(yaw)*forward+
+   Math.cos(yaw)*side
+  )*speed*dt;
+
+  const dz=(
+   Math.cos(yaw)*forward-
+   Math.sin(yaw)*side
+  )*speed*dt;
+
+  player.position.x=clamp(
+   player.position.x+dx,-17.5,17.5
+  );
+
+  player.position.z=clamp(
+   player.position.z+dz,-73,12
+  );
+
+  player.rotation.y=Math.atan2(dx,dz)+Math.PI;
  }
 
- target.set(player.position.x,1.45,player.position.z);
- const distance=6.5;
- camera.position.set(
-  player.position.x+Math.sin(yaw)*distance,
-  player.position.y+2.8+pitch*3,
-  player.position.z+Math.cos(yaw)*distance
- );
- camera.lookAt(target);
+ const swing=moving?Math.sin(time*9)*0.5:0;
+
+ legs[0].rotation.x=swing;
+ legs[1].rotation.x=-swing;
+
+ legs[0].userData.lower.rotation.x=Math.max(0,-swing)*0.6;
+ legs[1].userData.lower.rotation.x=Math.max(0,swing)*0.6;
+
+ arms[0].rotation.x=-swing*0.6;
+ arms[1].rotation.x=swing*0.6;
+
+ human.position.y=moving?Math.abs(Math.sin(time*9))*0.025:0;
+
+ cameraUpdate();
  renderer.render(scene,camera);
 }
-animate();
 
-addEventListener('resize',()=>{
+window.addEventListener('resize',()=>{
  camera.aspect=innerWidth/innerHeight;
  camera.updateProjectionMatrix();
  renderer.setSize(innerWidth,innerHeight);
- renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));
 });
+
+cameraUpdate();
+animate();
 </script>
 </body>
 </html>
