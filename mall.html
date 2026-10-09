@@ -1,480 +1,425 @@
 
 <!DOCTYPE html>
-<html lang="si">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>C&N SHOPPING HALL 3D</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;overflow:hidden;font-family:Arial,sans-serif;background:#111827;color:white}
-button{border:0;border-radius:12px;padding:11px 14px;font-weight:bold;cursor:pointer}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#aebbc5;font-family:Arial,sans-serif;touch-action:none}
 #game{position:fixed;inset:0}
-#top{position:fixed;z-index:3;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;gap:8px;align-items:center;pointer-events:none}
-.brand,.carttop{background:#101827e8;padding:11px;border-radius:12px;border:1px solid #ffffff35;pointer-events:auto}
-.brand{color:#ffd166;font-weight:900}
-.carttop{font-size:13px}
-#hint{position:fixed;z-index:3;top:66px;left:50%;transform:translateX(-50%);background:#101827dd;border-radius:12px;padding:9px 12px;text-align:center;font-size:12px;width:max-content;max-width:94%}
-#controls{position:fixed;z-index:4;bottom:17px;left:12px;display:grid;grid-template-columns:47px 47px 47px;gap:5px}
-#controls button{height:45px;padding:2px;background:#18253eeb;color:white;border:1px solid #ffffff50;font-size:19px;touch-action:none}
-#controls .empty{visibility:hidden}
-#actions{position:fixed;z-index:4;right:12px;bottom:18px;display:flex;flex-direction:column;gap:8px}
-#actions button{background:#ffd166;color:#152238;font-size:12px;min-width:100px}
-#actions .other{background:#fff}
-#panel{display:none;position:fixed;z-index:9;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;color:#182238;width:min(420px,92vw);max-height:82vh;overflow:auto;padding:18px;border-radius:20px;box-shadow:0 12px 60px #000a}
-#panel img{width:100%;height:180px;object-fit:cover;border-radius:12px}
-#panel h2{margin:10px 0}
-#panel p{line-height:1.5}
-#panel button{margin-top:8px}
-#close{float:right;background:#eee}
-.wide{width:100%;background:#087f5b;color:white}
-#order{background:#1ca65b}
-#clear{background:#e9edf3;color:#172238}
-#footer{position:fixed;bottom:2px;left:50%;transform:translateX(-50%);z-index:2;font-size:9px;color:#ffffff9c;white-space:nowrap}
-@media(max-width:430px){
-.brand{font-size:11px;padding:9px}
-.carttop{font-size:11px;padding:9px}
-#controls{left:7px;bottom:12px;grid-template-columns:41px 41px 41px;gap:4px}
-#controls button{height:41px}
-#actions{right:7px;bottom:12px}
-#actions button{min-width:88px;padding:10px 6px;font-size:11px}
-}
+canvas{display:block}
+#brand{position:fixed;top:12px;left:12px;color:white;background:#102332e8;border:1px solid #ffffff38;border-radius:10px;padding:11px 15px;pointer-events:none}
+#brand strong{letter-spacing:1px;font-size:16px}
+#brand small{display:block;color:#c6d5df;margin-top:5px;font-size:10px}
+#help{position:fixed;top:12px;right:12px;padding:10px 12px;background:#102332d9;color:white;border-radius:9px;font-size:12px;line-height:1.7;pointer-events:none}
+#status{position:fixed;bottom:12px;left:50%;transform:translateX(-50%);padding:8px 13px;border-radius:20px;background:#102332e8;color:white;font-size:12px;white-space:nowrap}
+#loading{position:fixed;inset:0;z-index:9;background:#15232d;display:flex;align-items:center;justify-content:center;color:white;text-align:center;padding:24px}
+#loading h1{font-size:25px;letter-spacing:2px}
+#loading p{color:#d5e0e7;line-height:1.7}
+#pad{position:fixed;bottom:25px;left:18px;display:grid;grid-template-columns:50px 50px 50px;grid-template-rows:50px 50px;gap:5px}
+.ctrl{border:1px solid #ffffff70;border-radius:13px;background:#142a3be0;color:white;font-size:22px;touch-action:none;user-select:none;-webkit-user-select:none}
+#up{grid-column:2;grid-row:1}#left{grid-column:1;grid-row:2}#down{grid-column:2;grid-row:2}#right{grid-column:3;grid-row:2}
+#look{display:none;position:fixed;right:15px;bottom:30px;width:115px;height:115px;border:1px solid #ffffff75;border-radius:50%;background:#10233238;color:white;align-items:center;justify-content:center;font-size:11px;touch-action:none}
+@media(pointer:coarse){#look{display:flex}#help{max-width:155px;font-size:10px}}
 </style>
 </head>
 <body>
 <div id="game"></div>
-<div id="top">
-  <div class="brand">🛍️ C&N SHOPPING HALL</div>
-  <div class="carttop">🛒 Cart: <b id="count">0</b></div>
+<div id="brand"><strong>C&N SHOPPING HALL</strong><small>3D SUPERMARKET EXPERIENCE</small></div>
+<div id="help">W A S D / Arrow keys: Move<br>Mouse drag: Look around<br>Mobile: Buttons + drag</div>
+<div id="status">Loading supermarket...</div>
+<div id="loading"><div><h1>C&N SHOPPING HALL</h1><p>Loading the 3D supermarket and character.<br>Please wait while the models load.</p></div></div>
+<div id="pad">
+<button class="ctrl" id="up" aria-label="Move forward">▲</button>
+<button class="ctrl" id="left" aria-label="Move left">◀</button>
+<button class="ctrl" id="down" aria-label="Move backward">▼</button>
+<button class="ctrl" id="right" aria-label="Move right">▶</button>
 </div>
-<div id="hint">⬆️ ඇවිදින්න • තිරයේ දකුණු පැත්ත ඇදලා බලන දිශාව වෙනස් කරන්න</div>
+<div id="look">DRAG TO LOOK</div>
 
-<div id="controls">
-  <span class="empty"></span><button data-m="f">⬆️</button><span class="empty"></span>
-  <button data-m="l">⬅️</button><button data-m="b">⬇️</button><button data-m="r">➡️</button>
-</div>
-<div id="actions">
-  <button id="cartButton">🛒 Cart එක</button>
-  <button id="resetButton" class="other">🏬 ආරම්භයට</button>
-</div>
-<div id="panel">
-  <button id="close">✕ වහන්න</button>
-  <div id="content"></div>
-</div>
-<div id="footer">C&N SHOPPING HALL • 3D SHOPPING EXPERIENCE</div>
-
+<script type="importmap">
+{
+ "imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+ }
+}
+</script>
 <script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 
-const scene = new THREE.Scene();
-scene.background = new THREE.Color('#b8d8ef');
-scene.fog = new THREE.Fog('#b8d8ef',35,100);
+const game=document.querySelector('#game');
+const status=document.querySelector('#status');
+const loading=document.querySelector('#loading');
 
-const camera = new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,180);
-const renderer = new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0xb7c5ce);
+scene.fog=new THREE.Fog(0xb7c5ce,48,105);
+
+const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,180);
+const renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
 renderer.setSize(innerWidth,innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio,1.7));
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));
 renderer.shadowMap.enabled=true;
 renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure=1.15;
-document.getElementById('game').appendChild(renderer.domElement);
+game.appendChild(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xe5f4ff,0x777b91,2.1));
-const sun=new THREE.DirectionalLight(0xffffff,2.4);
-sun.position.set(-9,18,9);
+scene.add(new THREE.HemisphereLight(0xeaf4ff,0x635747,2.0));
+
+const sun=new THREE.DirectionalLight(0xfff0d9,2.7);
+sun.position.set(-15,24,12);
 sun.castShadow=true;
-sun.shadow.mapSize.set(1024,1024);
-sun.shadow.camera.left=-30;
-sun.shadow.camera.right=30;
-sun.shadow.camera.top=30;
-sun.shadow.camera.bottom=-30;
+sun.shadow.mapSize.set(2048,2048);
+sun.shadow.camera.left=-36;
+sun.shadow.camera.right=36;
+sun.shadow.camera.top=40;
+sun.shadow.camera.bottom=-40;
 scene.add(sun);
 
-function material(color,roughness=.7,metalness=0){
+function material(color,roughness=.6,metalness=0){
  return new THREE.MeshStandardMaterial({color,roughness,metalness});
 }
-const floorMat=material('#d9dee8',.3);
-const wallMat=material('#f0f2f7');
-const shelfMat=material('#28364d',.45,.15);
-const goldMat=material('#e8b94e',.32,.3);
+const concrete=material(0x858d92,.35,.12);
+const wall=material(0xd9dfe1,.85);
+const metal=material(0x8c9aa2,.3,.82);
+const frame=material(0x46545d,.38,.72);
+const shelfSurface=material(0xc3cbd0,.4,.58);
+const dark=material(0x24333b,.48,.4);
+const white=material(0xf1f3f4,.3,.15);
+const gold=material(0xe2b654,.36,.35);
 
-function box(w,h,d,x,y,z,mat,shadow=true){
- const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
- mesh.position.set(x,y,z);
- mesh.castShadow=shadow;
- mesh.receiveShadow=true;
- scene.add(mesh);
- return mesh;
+function addBox(w,h,d,mat,x,y,z,shadow=true){
+ const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);
+ m.position.set(x,y,z);
+ m.castShadow=shadow;
+ m.receiveShadow=true;
+ scene.add(m);
+ return m;
 }
 
-// Long shopping hall
-const floor=new THREE.Mesh(new THREE.PlaneGeometry(24,100),floorMat);
-floor.rotation.x=-Math.PI/2;
-floor.position.set(0,0,-39);
-floor.receiveShadow=true;
-scene.add(floor);
-
-box(24,.22,100,0,7,-39,material('#e9edf5'),false);
-box(.35,7,100,-12,3.5,-39,wallMat);
-box(.35,7,100,12,3.5,-39,wallMat);
-box(24,7,.35,0,3.5,-89,wallMat);
-box(24,7,.35,0,3.5,11,wallMat);
-
-// Floor tiles
-const grout=material('#c1c9d7',.8);
-for(let x=-11;x<=11;x+=2){
- box(.025,.008,98,x,.009,-39,grout,false);
+// Large tiled floor
+addBox(64,.2,86,concrete,0,-.18,-9,false);
+const grout=material(0xaeb4b7,.8);
+for(let x=-31;x<=31;x+=2){
+ addBox(.018,.008,84,grout,x,-.075,-9,false);
 }
-for(let z=9;z>=-87;z-=2){
- box(23,.008,.025,0,.01,z,grout,false);
+for(let z=-51;z<=33;z+=2){
+ addBox(64,.008,.018,grout,0,-.073,z,false);
 }
 
-// Shop signs
-function sign(text,x,y,z,w=5){
- const canvas=document.createElement('canvas');
- canvas.width=768;canvas.height=180;
- const c=canvas.getContext('2d');
- c.fillStyle='#17263f';c.fillRect(0,0,768,180);
- c.fillStyle='#ffd166';c.font='bold 62px Arial';
- c.textAlign='center';c.textBaseline='middle';
- c.fillText(text,384,90);
- const tex=new THREE.CanvasTexture(canvas);
- const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,1.1),
-  new THREE.MeshBasicMaterial({map:tex}));
- mesh.position.set(x,y,z);scene.add(mesh);
+// Store walls and roof beams
+addBox(64,8,.5,wall,0,4,-52,false);
+addBox(.5,8,86,wall,-32,4,-9,false);
+addBox(.5,8,86,wall,32,4,-9,false);
+for(let x=-28;x<=28;x+=7){
+ addBox(.15,.18,84,frame,x,7.4,-9,false);
 }
-sign('C&N SHOPPING HALL',0,5.8,10.78,10);
-
-// Ceiling lights
-for(let z=7;z>=-83;z-=9){
- box(4,.08,.65,-3,6.85,z,material('#ffffff',.2),false);
- const light=new THREE.PointLight(0xfff1d0,38,15,2);
- light.position.set(-3,6.4,z);
- scene.add(light);
- const light2=new THREE.PointLight(0xffffff,26,14,2);
- light2.position.set(3,6.2,z-3);
- scene.add(light2);
+for(let z=-45;z<=25;z+=14){
+ addBox(63,.12,.2,frame,0,7.15,z,false);
 }
 
-// Product data and online product photographs
-const products=[
-{id:1,name:'Fashion Shoes',cat:'Shoes',price:8500,color:'#d94b62',img:'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=650&auto=format&fit=crop'},
-{id:2,name:'Wrist Watch',cat:'Accessories',price:12500,color:'#2681aa',img:'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=650&auto=format&fit=crop'},
-{id:3,name:'Headphones',cat:'Electronics',price:9900,color:'#8557c8',img:'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=650&auto=format&fit=crop'},
-{id:4,name:'Backpack',cat:'Bags',price:6500,color:'#218d6b',img:'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=650&auto=format&fit=crop'},
-{id:5,name:'Sunglasses',cat:'Fashion',price:4500,color:'#c47b30',img:'https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=650&auto=format&fit=crop'},
-{id:6,name:'Camera',cat:'Electronics',price:42500,color:'#3e76bd',img:'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=650&auto=format&fit=crop'},
-{id:7,name:'Casual Shirt',cat:'Clothing',price:5200,color:'#c34b85',img:'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=650&auto=format&fit=crop'},
-{id:8,name:'Perfume',cat:'Beauty',price:7800,color:'#9b70c9',img:'https://images.unsplash.com/photo-1541643600914-78b084683601?w=650&auto=format&fit=crop'},
-{id:9,name:'Fresh Drinks',cat:'Drinks',price:650,color:'#4eaa70',img:'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=650&auto=format&fit=crop'},
-{id:10,name:'Shopping Snacks',cat:'Food',price:450,color:'#d59a3b',img:'https://images.unsplash.com/photo-1621939514649-280e2aa7f126?w=650&auto=format&fit=crop'},
-{id:11,name:'Sports Shoes',cat:'Sports',price:10500,color:'#5482c2',img:'https://images.unsplash.com/photo-1460353581641-37baddab0fa2?w=650&auto=format&fit=crop'},
-{id:12,name:'Handbag',cat:'Fashion',price:9200,color:'#b17b5a',img:'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=650&auto=format&fit=crop'}
-];
-
-const textureLoader=new THREE.TextureLoader();
-textureLoader.setCrossOrigin('anonymous');
-const clickable=[];
-const productMeshes=[];
-
-function addPhoto(p,parent,x,y,z,w,h){
- const mat=new THREE.MeshStandardMaterial({color:p.color,roughness:.6});
- const photo=new THREE.Mesh(new THREE.PlaneGeometry(w,h),mat);
- photo.position.set(x,y,z);
- parent.add(photo);
- textureLoader.load(p.img,tex=>{
-  tex.colorSpace=THREE.SRGBColorSpace;
-  photo.material=new THREE.MeshBasicMaterial({map:tex});
- },undefined,()=>{});
- photo.userData.product=p;
- clickable.push(photo);
- return photo;
+// Main store sign
+addBox(19,1.7,.16,dark,0,6.1,-51.7,false);
+function makeText(text,width,height,color){
+ const c=document.createElement('canvas');
+ c.width=1024;c.height=256;
+ const ctx=c.getContext('2d');
+ ctx.clearRect(0,0,c.width,c.height);
+ ctx.fillStyle=color;
+ ctx.font='bold 88px Arial';
+ ctx.textAlign='center';
+ ctx.textBaseline='middle';
+ ctx.fillText(text,512,128);
+ const tex=new THREE.CanvasTexture(c);
+ tex.colorSpace=THREE.SRGBColorSpace;
+ const m=new THREE.Mesh(
+  new THREE.PlaneGeometry(width,height),
+  new THREE.MeshBasicMaterial({map:tex,transparent:true,side:THREE.DoubleSide})
+ );
+ return m;
 }
+const sign=makeText('C&N SHOPPING HALL',17,1.65,'#ffffff');
+sign.position.set(0,6.1,-51.59);
+scene.add(sign);
 
-function makeLabel(p,parent,x,y,z){
- const canvas=document.createElement('canvas');
- canvas.width=512;canvas.height=110;
- const c=canvas.getContext('2d');
- c.fillStyle='#fff';c.fillRect(0,0,512,110);
- c.fillStyle='#15233b';c.font='bold 30px Arial';
- c.textAlign='center';
- c.fillText(p.name,256,36);
- c.fillStyle='#087f5b';c.font='bold 31px Arial';
- c.fillText('Rs. '+p.price.toLocaleString('en-US'),256,82);
- const tex=new THREE.CanvasTexture(canvas);
- const mesh=new THREE.Mesh(new THREE.PlaneGeometry(1.55,.34),
-  new THREE.MeshBasicMaterial({map:tex}));
- mesh.position.set(x,y,z);parent.add(mesh);
-}
+// Realistic-looking metal shelving with empty shelves
+function createRack(cx,cz,length=22){
+ const rack=new THREE.Group();
+ rack.position.set(cx,0,cz);
+ scene.add(rack);
+ const w=2.3,h=3.25;
+ const levels=[.38,1.02,1.66,2.30,2.94];
 
-// Multiple long rows of racks, with merchandise on each shelf
-function makeRack(x,z,p,side){
- const group=new THREE.Group();
- group.position.set(x,0,z);
- scene.add(group);
- const width=3.35,depth=1.15;
- box(width,.17,depth,x, .45,z,shelfMat);
- box(width,.12,depth,x,1.45,z,shelfMat);
- box(width,.12,depth,x,2.35,z,shelfMat);
- box(.12,2.65,depth,x-width/2,.1+1.25,z,goldMat);
- box(.12,2.65,depth,x+width/2,.1+1.25,z,goldMat);
- box(width,.1,depth,x,3.02,z,shelfMat);
-
- const faceZ=z+(side==='left'?.60:-.60);
- const baseP=p;
- for(let level=0;level<3;level++){
-  addPhoto(baseP,group,0,.88+level*.88,side==='left'?.59:-.59,1.05,.62);
-  // Small merchandise packages beside the featured product
-  for(let j=0;j<3;j++){
-   const colors=[p.color,'#e6bd61','#6bb3a5','#d8757c','#7791cf'];
-   const pkg=box(.22,.35,.23,
-    x-1.05+j*.65,.72+level*.88,z+(side==='left'?.35:-.35),
-    material(colors[(j+level)%colors.length]),false);
-   pkg.userData.product=p;
-   clickable.push(pkg);
+ // Tall metal posts
+ for(const x of [-w/2,w/2]){
+  for(const z of [-length/2,length/2]){
+   const p=new THREE.Mesh(new THREE.BoxGeometry(.075,h,.075),metal);
+   p.position.set(x,h/2,z);
+   p.castShadow=true;
+   rack.add(p);
   }
-  makeLabel(p,group,0,.54+level*.88,side==='left'?.605:-.605);
+  // Long structural rails
+  for(const y of [.35,.98,1.61,2.24,2.87]){
+   const rail=new THREE.Mesh(new THREE.BoxGeometry(.045,.045,length),frame);
+   rail.position.set(x,y,0);
+   rack.add(rail);
+  }
+ }
+
+ // Shelf decks
+ for(const y of levels){
+  const deck=new THREE.Mesh(new THREE.BoxGeometry(w,.075,length),shelfSurface);
+  deck.position.set(0,y,0);
+  deck.castShadow=true;
+  deck.receiveShadow=true;
+  rack.add(deck);
+
+  // Front and back lips
+  for(const z of [-length/2,length/2]){
+   const lip=new THREE.Mesh(new THREE.BoxGeometry(w,.09,.045),metal);
+   lip.position.set(0,y+.045,z);
+   rack.add(lip);
+  }
+ }
+
+ // Back panels and perforation details
+ for(let z=-length/2+.5;z<length/2;z+=.65){
+  const panel=new THREE.Mesh(new THREE.BoxGeometry(w-.08,.5,.025),frame);
+  panel.position.set(0,1.8,z);
+  rack.add(panel);
+  for(let y=1.61;y<=2.03;y+=.14){
+   const hole=new THREE.Mesh(new THREE.BoxGeometry(w-.22,.012,.03),metal);
+   hole.position.set(0,y,z+.018);
+   rack.add(hole);
+  }
+ }
+
+ // Diagonal side braces
+ for(const z of [-length/2+.2,length/2-.2]){
+  for(const x of [-w/2,w/2]){
+   const brace=new THREE.Mesh(new THREE.BoxGeometry(.045,2.6,.045),metal);
+   brace.position.set(x,1.6,z);
+   brace.rotation.z=x<0?-.12:.12;
+   rack.add(brace);
+  }
+ }
+ return rack;
+}
+
+// Six long rack rows with wide walkways
+[-22,-15,-8,8,15,22].forEach(x=>createRack(x,-15,25));
+
+// Short cross-aisle shelving at the rear
+createRack(-11.5,-.8,2.4);
+createRack(11.5,-.8,2.4);
+
+// Entrance counter
+addBox(11,.85,1.2,dark,0,.43,20);
+addBox(11,.12,1.3,white,0,.92,20);
+addBox(11,.045,.06,gold,0,.99,19.35,false);
+
+// Overhead LED light fixtures
+const lampMaterial=new THREE.MeshStandardMaterial({
+ color:0xffffff,emissive:0xffffff,emissiveIntensity:1.2,roughness:.3
+});
+for(let x=-25;x<=25;x+=10){
+ for(let z=-43;z<=20;z+=12){
+  addBox(3.2,.12,.72,frame,x,6.85,z,false);
+  addBox(2.9,.045,.52,lampMaterial,x,6.77,z,false);
+  const light=new THREE.PointLight(0xfff2df,36,17,2);
+  light.position.set(x,6.55,z);
+  scene.add(light);
  }
 }
 
-// Long aisles, separated by wide walking paths
-for(let row=0;row<4;row++){
- const zStart=5-row*9;
- for(let n=0;n<5;n++){
-  const z=zStart-n*9;
-  if(z < -83)continue;
-  const leftP=products[(row*2+n)%products.length];
-  const rightP=products[(row*2+n+4)%products.length];
-  makeRack(-8.2,z,leftP,'left');
-  makeRack(8.2,z,rightP,'right');
- }
+// Entrance pillars
+for(const x of [-9,9]){
+ addBox(.35,4,.35,metal,x,2,24);
+ addBox(1.2,.18,.8,white,x,4.08,24);
 }
 
-// Central promotional display tables
-function makeTable(x,z,p){
- box(2.2,.3,1.5,x,.7,z,material('#a86d49'));
- box(2.35,.12,1.65,x,.91,z,goldMat);
- for(let i=0;i<3;i++){
-  const offset=(i-1)*.65;
-  const obj=box(.42,.65,.42,x+offset,1.28,z,material(p.color));
-  obj.userData.product=p;clickable.push(obj);
- }
- addPhoto(p,scene,x,2.0,z+.02,1.7,.8);
- const marker=scene.children[scene.children.length-1];
- marker.userData.product=p;
- clickable.push(marker);
-}
-for(let i=0;i<7;i++){
- makeTable(0,2-i*12,products[(i+2)%products.length]);
-}
-
-// Plants at selected corners
-function makePlant(x,z){
- const pot=new THREE.Mesh(new THREE.CylinderGeometry(.34,.25,.55,14),material('#a96845'));
- pot.position.set(x,.28,z);scene.add(pot);
- for(let i=0;i<6;i++){
-  const leaf=new THREE.Mesh(new THREE.SphereGeometry(.22,10,8),
-   material(i%2?'#278657':'#45a56b'));
-  leaf.scale.set(.7,2,.7);
-  leaf.position.set(x+Math.sin(i)*.23,.8+(i%3)*.2,z+Math.cos(i)*.2);
-  scene.add(leaf);
- }
-}
-makePlant(-10,8);makePlant(10,8);
-makePlant(-10,-85);makePlant(10,-85);
-
-// Player character: head, body, arms and legs
+// Character holder
 const player=new THREE.Group();
 scene.add(player);
-const skin=material('#d7a27e');
-const shirt=material('#2677c8');
-const pants=material('#25334b');
-const shoes=material('#f4f4f4');
-const hair=material('#30231e');
+player.position.set(0,0,28);
 
-function part(parent,w,h,d,x,y,z,mat,round=false){
- const mesh=new THREE.Mesh(
-  round?new THREE.SphereGeometry(w/2,16,12):new THREE.BoxGeometry(w,h,d),mat
- );
- mesh.position.set(x,y,z);
- mesh.castShadow=true;
- parent.add(mesh);
- return mesh;
-}
-part(player,.55,.78,.32,0,1.12,0,shirt);
-part(player,.43,.45,.4,0,1.78,0,skin,true);
-part(player,.46,.18,.42,0,2.0,0,hair,true);
-part(player,.12,.52,.13,-.38,1.15,0,skin);
-part(player,.12,.52,.13,.38,1.15,0,skin);
-const legL=part(player,.19,.65,.22,-.15,.43,0,pants);
-const legR=part(player,.19,.65,.22,.15,.43,0,pants);
-const footL=part(player,.22,.15,.36,-.15,.12,-.07,shoes);
-const footR=part(player,.22,.15,.36,.15,.12,-.07,shoes);
-player.position.set(0,0,8);
+let mixer=null;
+let idleAction=null;
+let walkAction=null;
+let activeAction=null;
+let characterReady=false;
 
-// Camera follows behind the player
-let yaw=0;
-let pitch=.08;
-function updateCamera(){
- const distance=5.7;
- const target=new THREE.Vector3(
-  player.position.x+Math.sin(yaw)*distance,
-  player.position.y+3.1+pitch*2,
-  player.position.z+Math.cos(yaw)*distance
- );
- camera.position.lerp(target,.18);
- const look=new THREE.Vector3(
-  player.position.x,
-  player.position.y+1.3,
-  player.position.z- Math.cos(yaw)*2
- );
- camera.lookAt(look);
+function playAction(action){
+ if(!action||activeAction===action)return;
+ action.reset().fadeIn(.2).play();
+ if(activeAction)activeAction.fadeOut(.2);
+ activeAction=action;
 }
 
-const keys={};
-const moving={f:false,b:false,l:false,r:false};
-addEventListener('keydown',e=>{
- keys[e.code]=true;
- if(e.code.startsWith('Arrow'))e.preventDefault();
-});
-addEventListener('keyup',e=>keys[e.code]=false);
+const loader=new GLTFLoader();
+loader.load(
+ 'https://threejs.org/examples/models/gltf/Soldier.glb',
+ gltf=>{
+  const model=gltf.scene;
+  model.scale.setScalar(1.05);
+  model.traverse(o=>{
+   if(o.isMesh){
+    o.castShadow=true;
+    o.receiveShadow=true;
+   }
+  });
+  player.add(model);
 
-document.querySelectorAll('[data-m]').forEach(btn=>{
- const k=btn.dataset.m;
- const down=e=>{e.preventDefault();moving[k]=true};
- const up=e=>{e.preventDefault();moving[k]=false};
- btn.addEventListener('pointerdown',down);
- btn.addEventListener('pointerup',up);
- btn.addEventListener('pointercancel',up);
- btn.addEventListener('pointerleave',up);
-});
-
-// Drag on the right side to rotate camera around the character
-let dragX=null,dragY=null;
-renderer.domElement.addEventListener('pointerdown',e=>{
- if(e.clientX>innerWidth*.38){
-  dragX=e.clientX;dragY=e.clientY;
+  mixer=new THREE.AnimationMixer(model);
+  for(const clip of gltf.animations){
+   const action=mixer.clipAction(clip);
+   if(clip.name.toLowerCase().includes('walk'))walkAction=action;
+   if(clip.name.toLowerCase().includes('idle'))idleAction=action;
+  }
+  if(!idleAction&&gltf.animations.length)idleAction=mixer.clipAction(gltf.animations[0]);
+  playAction(idleAction);
+  characterReady=true;
+  loading.style.display='none';
+  status.textContent='Ready — use the controls to walk';
+ },
+ undefined,
+ error=>{
+  console.error('Character model failed to load:',error);
+  loading.querySelector('p').textContent=
+   'The 3D character could not load. Check your internet connection and reload.';
+  status.textContent='Character model failed to load';
  }
+);
+
+// Camera orientation
+let yaw=0;
+let pitch=.18;
+let dragging=false;
+let lastX=0,lastY=0;
+
+renderer.domElement.addEventListener('pointerdown',e=>{
+ dragging=true;
+ lastX=e.clientX;
+ lastY=e.clientY;
+ renderer.domElement.setPointerCapture(e.pointerId);
 });
 renderer.domElement.addEventListener('pointermove',e=>{
- if(dragX!==null){
-  yaw+=(e.clientX-dragX)*.006;
-  pitch=THREE.MathUtils.clamp(pitch+(e.clientY-dragY)*.002,-.4,.5);
-  dragX=e.clientX;dragY=e.clientY;
- }
+ if(!dragging)return;
+ yaw-=(e.clientX-lastX)*.005;
+ pitch=THREE.MathUtils.clamp(pitch-(e.clientY-lastY)*.004,-.15,.75);
+ lastX=e.clientX;
+ lastY=e.clientY;
 });
-renderer.domElement.addEventListener('pointerup',()=>{
- dragX=null;dragY=null;
-});
-renderer.domElement.addEventListener('pointercancel',()=>{
- dragX=null;dragY=null;
-});
+function endDrag(){dragging=false}
+renderer.domElement.addEventListener('pointerup',endDrag);
+renderer.domElement.addEventListener('pointercancel',endDrag);
 
-// Product selection
-const raycaster=new THREE.Raycaster();
-const pointer=new THREE.Vector2();
-const cart=[];
-function openProduct(p){
- document.getElementById('content').innerHTML=`
-  <img src="${p.img}" alt="${p.name}">
-  <h2>${p.name}</h2>
-  <p>Category: ${p.cat}</p>
-  <h2 style="color:#087f5b">Rs. ${p.price.toLocaleString('en-US')}</h2>
-  <button class="wide" id="add">🛒 Cart එකට දාන්න</button>`;
- document.getElementById('panel').style.display='block';
- document.getElementById('add').onclick=()=>{
-  cart.push(p);updateCart();
-  document.getElementById('hint').textContent='✅ Cart එකට එකතු කළා!';
- };
-}
-renderer.domElement.addEventListener('click',e=>{
- if(e.clientX<innerWidth*.38)return;
- pointer.x=e.clientX/innerWidth*2-1;
- pointer.y=-(e.clientY/innerHeight)*2+1;
- raycaster.setFromCamera(pointer,camera);
- const hits=raycaster.intersectObjects(clickable,false);
- if(hits.length){
-  const p=hits[0].object.userData.product;
-  if(p)openProduct(p);
- }
+// Keyboard controls
+const keys=Object.create(null);
+addEventListener('keydown',e=>{
+ const k=e.key.toLowerCase();
+ keys[k]=true;
+ if(k.startsWith('arrow'))e.preventDefault();
 });
+addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+addEventListener('blur',()=>Object.keys(keys).forEach(k=>keys[k]=false));
 
-function updateCart(){
- document.getElementById('count').textContent=cart.length;
+// Touch movement buttons
+const buttonKeys={up:'w',down:'s',left:'a',right:'d'};
+for(const [id,key] of Object.entries(buttonKeys)){
+ const b=document.getElementById(id);
+ b.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  keys[key]=true;
+  b.setPointerCapture(e.pointerId);
+ });
+ const release=()=>keys[key]=false;
+ b.addEventListener('pointerup',release);
+ b.addEventListener('pointercancel',release);
+ b.addEventListener('lostpointercapture',release);
 }
-function openCart(){
- const total=cart.reduce((sum,p)=>sum+p.price,0);
- const list=cart.map((p,i)=>`<li>${p.name} — Rs. ${p.price.toLocaleString('en-US')}</li>`).join('');
- document.getElementById('content').innerHTML=`
-  <h2>🛒 මගේ Cart එක</h2>
-  ${cart.length?'<ol>'+list+'</ol>':'<p>Cart එක තවම හිස්.</p>'}
-  <h2>මුළු මුදල: Rs. ${total.toLocaleString('en-US')}</h2>
-  ${cart.length?'<button class="wide" id="order">WhatsApp Order කරන්න</button>':''}
-  <button class="wide" id="clear">Cart එක හිස් කරන්න</button>`;
- document.getElementById('panel').style.display='block';
- const order=document.getElementById('order');
- if(order)order.onclick=()=>{
-  const lines=cart.map((p,i)=>`${i+1}. ${p.name} - Rs. ${p.price}`).join('\n');
-  const msg=`C&N SHOPPING HALL Order\n${lines}\nTotal: Rs. ${total}`;
-  window.open('https://wa.me/94767054639?text='+encodeURIComponent(msg),'_blank');
- };
- document.getElementById('clear').onclick=()=>{
-  cart.length=0;updateCart();openCart();
- };
-}
-document.getElementById('cartButton').onclick=openCart;
-document.getElementById('close').onclick=()=>{
- document.getElementById('panel').style.display='none';
-};
-document.getElementById('resetButton').onclick=()=>{
- player.position.set(0,0,8);yaw=0;pitch=.08;
- document.getElementById('panel').style.display='none';
- document.getElementById('hint').textContent='🏬 ආරම්භක ස්ථානයට ආවා!';
-};
 
-// Game loop
+// Dedicated mobile look pad
+const look=document.getElementById('look');
+let looking=false,lookX=0,lookY=0;
+look.addEventListener('pointerdown',e=>{
+ looking=true;
+ lookX=e.clientX;
+ lookY=e.clientY;
+ look.setPointerCapture(e.pointerId);
+});
+look.addEventListener('pointermove',e=>{
+ if(!looking)return;
+ yaw-=(e.clientX-lookX)*.008;
+ pitch=THREE.MathUtils.clamp(pitch-(e.clientY-lookY)*.006,-.15,.75);
+ lookX=e.clientX;
+ lookY=e.clientY;
+});
+look.addEventListener('pointerup',()=>looking=false);
+look.addEventListener('pointercancel',()=>looking=false);
+
+// Movement and third-person camera
 const clock=new THREE.Clock();
-let walkTime=0;
+const move=new THREE.Vector3();
+const forward=new THREE.Vector3();
+const side=new THREE.Vector3();
+const target=new THREE.Vector3();
+
 function animate(){
  requestAnimationFrame(animate);
- const dt=Math.min(clock.getDelta(),.04);
- let forward=0,side=0;
- if(keys.ArrowUp||keys.KeyW||moving.f)forward+=1;
- if(keys.ArrowDown||keys.KeyS||moving.b)forward-=1;
- if(keys.ArrowLeft||keys.KeyA||moving.l)side-=1;
- if(keys.ArrowRight||keys.KeyD||moving.r)side+=1;
+ const dt=Math.min(clock.getDelta(),.05);
+ if(mixer)mixer.update(dt);
 
- const len=Math.hypot(forward,side);
- if(len>0){
-  forward/=len;side/=len;
-  const speed=4.0*dt;
-  const angle=yaw;
-  player.position.x+=(-Math.sin(angle)*forward+Math.cos(angle)*side)*speed;
-  player.position.z+=(-Math.cos(angle)*forward-Math.sin(angle)*side)*speed;
-  player.rotation.y=Math.atan2(-side,forward)-yaw;
-  walkTime+=dt*10;
-  legL.rotation.x=Math.sin(walkTime)*.45;
-  legR.rotation.x=-Math.sin(walkTime)*.45;
-  footL.rotation.x=legL.rotation.x;
-  footR.rotation.x=legR.rotation.x;
+ const forwardPressed=keys.w||keys.arrowup;
+ const backPressed=keys.s||keys.arrowdown;
+ const leftPressed=keys.a||keys.arrowleft;
+ const rightPressed=keys.d||keys.arrowright;
+
+ move.set(0,0,0);
+ forward.set(-Math.sin(yaw),0,-Math.cos(yaw));
+ side.set(Math.cos(yaw),0,-Math.sin(yaw));
+
+ if(forwardPressed)move.add(forward);
+ if(backPressed)move.sub(forward);
+ if(rightPressed)move.add(side);
+ if(leftPressed)move.sub(side);
+
+ const moving=move.lengthSq()>0;
+
+ if(moving){
+  move.normalize();
+  player.position.addScaledVector(move,4*dt);
+  player.rotation.y=Math.atan2(move.x,move.z);
+  player.position.x=THREE.MathUtils.clamp(player.position.x,-29,29);
+  player.position.z=THREE.MathUtils.clamp(player.position.z,-49,31);
+  playAction(walkAction||idleAction);
  }else{
-  legL.rotation.x*=.8;legR.rotation.x*=.8;
-  footL.rotation.x*=.8;footR.rotation.x*=.8;
+  playAction(idleAction);
  }
- player.position.x=THREE.MathUtils.clamp(player.position.x,-10.2,10.2);
- player.position.z=THREE.MathUtils.clamp(player.position.z,-87,9);
- updateCamera();
+
+ target.set(player.position.x,1.45,player.position.z);
+ const distance=6.5;
+ camera.position.set(
+  player.position.x+Math.sin(yaw)*distance,
+  player.position.y+2.8+pitch*3,
+  player.position.z+Math.cos(yaw)*distance
+ );
+ camera.lookAt(target);
  renderer.render(scene,camera);
 }
-updateCamera();
 animate();
 
 addEventListener('resize',()=>{
  camera.aspect=innerWidth/innerHeight;
  camera.updateProjectionMatrix();
  renderer.setSize(innerWidth,innerHeight);
+ renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));
 });
 </script>
 </body>
