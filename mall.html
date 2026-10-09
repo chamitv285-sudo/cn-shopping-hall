@@ -4,400 +4,527 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>C&N SHOPPING HALL - 3D Mall</title>
-
+<title>C&N SHOPPING HALL | 3D Shopping</title>
 <style>
 *{box-sizing:border-box}
-body{
-  margin:0;overflow:hidden;
-  font-family:Arial,sans-serif;
-  background:#101820;color:white;
-  touch-action:none
-}
-canvas{display:block;width:100%;height:100%}
-#hud{
-  position:fixed;top:12px;left:12px;z-index:5;
-  background:rgba(12,22,34,.88);
-  border:1px solid rgba(232,189,88,.65);
-  border-radius:14px;padding:13px 16px;
-  box-shadow:0 5px 25px #0005;
-  pointer-events:none;max-width:calc(100% - 24px)
-}
-#hud h2{margin:0 0 6px;color:#f5cf72;font-size:19px}
-#hud p{margin:5px 0;font-size:12px;color:#d8e4ee}
-#status{color:#f5cf72!important}
-#mobile{
-  display:none;position:fixed;bottom:24px;left:0;right:0;
-  z-index:6;justify-content:space-between;
-  align-items:end;padding:0 22px;
-  pointer-events:none
-}
-.pad{display:grid;grid-template-columns:52px 52px 52px;grid-template-rows:52px 52px;gap:5px}
-.control{
-  border:1px solid #ffffff66;border-radius:15px;
-  background:#142536cc;color:white;font-size:23px;
-  display:flex;align-items:center;justify-content:center;
-  user-select:none;-webkit-user-select:none;
-  pointer-events:auto;touch-action:none
-}
-.control.active{background:#c99b36}
-#lookHint{
-  position:fixed;right:12px;top:12px;z-index:4;
-  background:#101820bb;border-radius:10px;
-  padding:9px;font-size:11px;color:#fff
-}
+body{margin:0;overflow:hidden;background:#17232c;color:white;font-family:Arial,sans-serif;touch-action:none}
+canvas{display:block}
+button{font:inherit;cursor:pointer}
+#hud{position:fixed;top:12px;left:12px;z-index:5;background:#101820eF;border:1px solid #caa75b;border-radius:14px;padding:12px 15px;max-width:calc(100% - 24px);box-shadow:0 5px 24px #0006}
+#hud h2{margin:0 0 5px;color:#f3cf78;font-size:18px}
+#status{font-size:12px;color:#dce6eb;margin:6px 0}
+#money{color:#f3cf78;font-size:12px}
+#actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.uiBtn{border:0;border-radius:8px;padding:10px 12px;font-weight:bold;background:#e8bd58;color:#17202a}
+.uiBtn.secondary{background:#283d4c;color:white;border:1px solid #657582}
+#help{position:fixed;right:12px;top:12px;z-index:4;padding:9px 12px;border-radius:9px;background:#101820dc;font-size:11px;max-width:190px}
+#touch{display:none;position:fixed;bottom:18px;left:12px;right:12px;z-index:6;justify-content:space-between;align-items:end;pointer-events:none}
+.pad{display:grid;grid-template-columns:48px 48px 48px;grid-template-rows:48px 48px;gap:5px;pointer-events:auto}
+.touchBtn{display:grid;place-items:center;background:#122638d9;border:1px solid #ffffff75;border-radius:14px;color:white;font-size:22px;user-select:none;-webkit-user-select:none;touch-action:none}
+.touchBtn:active{background:#b98c32}
+#lookPad{display:grid;grid-template-columns:48px 48px;gap:5px;pointer-events:auto}
+#productPanel,#cartPanel{position:fixed;z-index:10;left:50%;top:50%;transform:translate(-50%,-50%);width:min(390px,calc(100% - 28px));max-height:80vh;overflow:auto;display:none;background:#14232e;border:1px solid #d3b15f;border-radius:17px;padding:20px;box-shadow:0 10px 50px #000b}
+#productPanel h2,#cartPanel h2{color:#f3cf78;margin:0 0 10px}
+#productIcon{font-size:65px;text-align:center;padding:15px;background:linear-gradient(145deg,#314a59,#17232c);border-radius:12px;margin:10px 0}
+#productPrice{font-size:22px;font-weight:bold;margin:12px 0;color:#f3cf78}
+#cartLines{font-size:13px;line-height:1.8;white-space:pre-line}
+.closeBtn{float:right;background:transparent;border:0;color:white;font-size:25px}
+.panelButtons{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.panelButtons button{flex:1}
+#toast{position:fixed;z-index:12;bottom:145px;left:50%;transform:translateX(-50%);background:#101820ed;border:1px solid #e8bd58;border-radius:10px;padding:10px 14px;display:none;font-size:13px;text-align:center}
 @media(max-width:700px){
-  #mobile{display:flex}
-  #hud{top:8px;left:8px;padding:10px 12px}
-  #hud h2{font-size:15px}
-  #hud p{font-size:11px}
-  #lookHint{top:auto;bottom:145px;right:12px;font-size:10px}
+ #hud{top:8px;left:8px;padding:9px 11px}
+ #hud h2{font-size:14px}
+ #status,#money{font-size:11px}
+ #help{top:100px;right:8px;font-size:10px;max-width:145px}
+ #touch{display:flex}
+ .uiBtn{font-size:12px;padding:9px}
 }
 </style>
 </head>
-
 <body>
 
 <div id="hud">
-  <h2>🏬 C&N SHOPPING HALL</h2>
-  <p>3D Shopping Experience</p>
-  <p>Explore our colourful mall!</p>
-  <p id="status">Welcome! Start exploring.</p>
+ <h2>🏬 C&N SHOPPING HALL</h2>
+ <div id="status">Welcome! Explore the mall.</div>
+ <div id="money">🛒 Cart: 0 items</div>
+ <div id="actions">
+  <button class="uiBtn" id="viewBtn">🔎 View Product</button>
+  <button class="uiBtn secondary" id="cartBtn">🛒 Cart</button>
+ </div>
 </div>
 
-<div id="lookHint">Drag screen to look around</div>
-
-<div id="mobile">
-  <div class="pad">
-    <div></div>
-    <div class="control" data-key="w">▲</div>
-    <div></div>
-    <div class="control" data-key="a">◀</div>
-    <div class="control" data-key="s">▼</div>
-    <div class="control" data-key="d">▶</div>
-  </div>
-  <div class="pad">
-    <div></div>
-    <div class="control" data-look="up">↑</div>
-    <div></div>
-    <div class="control" data-look="left">↶</div>
-    <div class="control" data-look="down">↓</div>
-    <div class="control" data-look="right">↷</div>
-  </div>
+<div id="help">
+ <b>SHOP & EXPLORE</b><br>
+ PC: WASD / Arrow keys<br>
+ Look: drag mouse<br>
+ Product: walk close + View<br>
+ Phone: touch controls
 </div>
+
+<div id="touch">
+ <div class="pad">
+  <div></div><div class="touchBtn" data-key="w">▲</div><div></div>
+  <div class="touchBtn" data-key="a">◀</div>
+  <div class="touchBtn" data-key="s">▼</div>
+  <div class="touchBtn" data-key="d">▶</div>
+ </div>
+ <div id="lookPad">
+  <button class="touchBtn" data-turn="left">↶</button>
+  <button class="touchBtn" data-turn="right">↷</button>
+  <button class="touchBtn" data-tilt="up">↑</button>
+  <button class="touchBtn" data-tilt="down">↓</button>
+ </div>
+</div>
+
+<div id="productPanel">
+ <button class="closeBtn" data-close="productPanel">×</button>
+ <h2 id="productName">Product</h2>
+ <div id="productIcon">🛍️</div>
+ <div id="productCategory"></div>
+ <div id="productPrice"></div>
+ <p id="productDescription"></p>
+ <div class="panelButtons">
+  <button class="uiBtn" id="addBtn">Add to Cart</button>
+  <button class="uiBtn secondary" data-close="productPanel">Continue Shopping</button>
+ </div>
+</div>
+
+<div id="cartPanel">
+ <button class="closeBtn" data-close="cartPanel">×</button>
+ <h2>🛒 Your Shopping Cart</h2>
+ <div id="cartLines">Your cart is empty.</div>
+ <div id="cartTotal" style="font-weight:bold;color:#f3cf78;margin-top:12px"></div>
+ <div class="panelButtons">
+  <button class="uiBtn" id="orderBtn">Order via WhatsApp</button>
+  <button class="uiBtn secondary" id="clearBtn">Clear Cart</button>
+ </div>
+ <p style="font-size:11px;color:#bac8d0">Availability, delivery fees and final prices must be confirmed by C&N Shopping Hall.</p>
+</div>
+
+<div id="toast"></div>
 
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 
+// Keep the existing C&N WhatsApp number
+const WHATSAPP_NUMBER = '94767054639';
+
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x9bbfd3);
-scene.fog = new THREE.Fog(0x9bbfd3, 35, 90);
+scene.background = new THREE.Color(0x9bb8c8);
+scene.fog = new THREE.Fog(0x9bb8c8, 38, 75);
 
-const camera = new THREE.PerspectiveCamera(
-  70, innerWidth / innerHeight, 0.1, 150
-);
-camera.position.set(0, 2, 15);
+const camera = new THREE.PerspectiveCamera(72,innerWidth/innerHeight,.1,120);
+camera.position.set(0,1.75,15);
 
-const renderer = new THREE.WebGLRenderer({
-  antialias: true,
-  powerPreference: 'high-performance'
-});
-renderer.setSize(innerWidth, innerHeight);
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.15;
+const renderer = new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.2;
 document.body.appendChild(renderer.domElement);
 
-scene.add(new THREE.HemisphereLight(0xe6f4ff, 0x66513d, 2.1));
+scene.add(new THREE.HemisphereLight(0xe8f5ff,0x6d5541,2.2));
 
-const sunlight = new THREE.DirectionalLight(0xffedce, 2.5);
-sunlight.position.set(-8, 15, 8);
-sunlight.castShadow = true;
-sunlight.shadow.mapSize.set(1024, 1024);
-sunlight.shadow.camera.left = -22;
-sunlight.shadow.camera.right = 22;
-sunlight.shadow.camera.top = 22;
-sunlight.shadow.camera.bottom = -22;
-scene.add(sunlight);
+const sun=new THREE.DirectionalLight(0xffedcf,2.5);
+sun.position.set(-7,13,8);
+sun.castShadow=true;
+sun.shadow.mapSize.set(1024,1024);
+sun.shadow.camera.left=-22;
+sun.shadow.camera.right=22;
+sun.shadow.camera.top=24;
+sun.shadow.camera.bottom=-24;
+scene.add(sun);
 
-const warmLight = new THREE.PointLight(0xffd18a, 45, 24);
-warmLight.position.set(0, 4, -4);
-scene.add(warmLight);
-
-function material(color, roughness=0.75, metalness=0){
-  return new THREE.MeshStandardMaterial({
-    color, roughness, metalness
-  });
+function mat(color,roughness=.65,metalness=0){
+ return new THREE.MeshStandardMaterial({color,roughness,metalness});
 }
 
-function box(w,h,d,x,y,z,color,options={}){
-  const mesh = new THREE.Mesh(
-    new THREE.BoxGeometry(w,h,d),
-    material(color, options.roughness ?? 0.75,
-                    options.metalness ?? 0)
-  );
-  mesh.position.set(x,y,z);
-  mesh.castShadow = true;
-  mesh.receiveShadow = true;
-  scene.add(mesh);
-  return mesh;
+function block(w,h,d,x,y,z,color,options={}){
+ const m=new THREE.Mesh(
+  new THREE.BoxGeometry(w,h,d),
+  mat(color,options.roughness??.65,options.metalness??0)
+ );
+ m.position.set(x,y,z);
+ m.castShadow=true;
+ m.receiveShadow=true;
+ scene.add(m);
+ return m;
 }
 
-function glowBox(w,h,d,x,y,z,color){
-  const mesh = box(w,h,d,x,y,z,color,{roughness:0.35});
-  mesh.material.emissive = new THREE.Color(color);
-  mesh.material.emissiveIntensity = 0.35;
-  return mesh;
+function cylinder(rt,rb,h,x,y,z,color){
+ const m=new THREE.Mesh(
+  new THREE.CylinderGeometry(rt,rb,h,16),
+  mat(color,.42)
+ );
+ m.position.set(x,y,z);
+ m.castShadow=true;
+ m.receiveShadow=true;
+ scene.add(m);
+ return m;
 }
 
-// Mall floor
-box(28,0.4,38,0,-0.3,0,0xd8d2c5);
-box(28,0.08,38,0,-0.06,0,0xf0e6d7);
+function glow(w,h,d,x,y,z,color){
+ const m=block(w,h,d,x,y,z,color,{roughness:.3});
+ m.material.emissive=new THREE.Color(color);
+ m.material.emissiveIntensity=.4;
+ return m;
+}
 
-// Decorative floor tiles
+// Marble-style tiled floor
+block(28,.45,40,0,-.28,0,0xc7c6c1);
+block(28,.08,40,0,-.04,0,0xe8e4dc);
+
 for(let x=-12;x<=12;x+=3){
-  for(let z=-17;z<=17;z+=3){
-    box(2.92,0.018,2.92,x,-0.075,z,
-      ((x/3+z/3)%2===0)?0xe8e0d2:0xdcd2c1);
-  }
+ for(let z=-18;z<=18;z+=3){
+  block(2.96,.012,2.96,x,-.079,z,
+   ((x/3+z/3)%2===0)?0xe4e0d7:0xd3d0ca,
+   {roughness:.3});
+ }
 }
 
-// Mall walls
-box(28,5,0.5,0,2.2,-19,0xe4d9c6);
-box(0.5,5,38,-14,2.2,0,0x7a8b94);
-box(0.5,5,38,14,2.2,0,0x7a8b94);
+// Walls and ceiling
+block(28,5,.5,0,2.25,-20,0xe9e2d5);
+block(.5,5,40,-14,2.2,0,0xb2b8ba);
+block(.5,5,40,14,2.2,0,0xb2b8ba);
+block(28,.25,40,0,5.05,0,0xe9e6df);
 
-// Roof and golden ceiling strips
-box(28,0.4,38,0,5.1,0,0xf0e6cf);
+// Gold ceiling details
+for(let x=-12;x<=12;x+=4){
+ block(.12,.1,38,x,4.88,0,0xd3ae63);
+}
+for(let z=-16;z<=16;z+=8){
+ block(26,.08,.12,0,4.85,z,0xd3ae63);
+}
+
+// Ceiling panels and warm lighting
 for(let x=-10;x<=10;x+=5){
-  box(0.18,0.12,35,x,4.82,0,0xd1a84c);
+ for(let z=-15;z<=15;z+=7.5){
+  glow(1.7,.08,2.1,x,4.76,z,0xffedc5);
+  const light=new THREE.PointLight(0xffdca0,15,10);
+  light.position.set(x,4.3,z);
+  scene.add(light);
+ }
 }
 
-// Ceiling lamps
-for(let x=-10;x<=10;x+=5){
-  for(let z=-14;z<=14;z+=7){
-    glowBox(1.25,0.08,2.0,x,4.55,z,0xffedb5);
-    const lamp = new THREE.PointLight(0xffe2a3, 18, 10);
-    lamp.position.set(x,4.2,z);
-    scene.add(lamp);
-  }
-}
-
-// Back wall decorative panels
-for(let x=-11;x<=11;x+=4){
-  box(2.6,2.1,0.12,x,2.7,-18.68,0xc8b89f);
-  box(2.3,1.8,0.08,x,2.7,-18.58,0x536e7b);
-}
-
-// Main shop sign
-box(8,1.2,0.35,0,4.0,-18.1,0x172e40);
-glowBox(7.6,0.08,0.12,0,4.55,-17.88,0xf4c965);
-box(0.12,0.6,0.12,-3.65,4.0,-17.85,0xf4c965);
-box(0.12,0.6,0.12,3.65,4.0,-17.85,0xf4c965);
-
-// Store shelves and colourful merchandise
-const productColors=[
-  0xd64f49,0x3289c8,0xe8bd58,
-  0x4aab75,0x9d6bd2,0xf08a48,
-  0xe67aa5,0x70c7c2
+// Shop fronts along the left and right
+const shopData=[
+ {x:-13.55,z:-12,name:'FASHION',color:0x8c5b68},
+ {x:13.55,z:-12,name:'ELECTRONICS',color:0x4b7b92},
+ {x:-13.55,z:0,name:'HOME & LIVING',color:0x7d8966},
+ {x:13.55,z:0,name:'BEAUTY',color:0x9a7195},
+ {x:-13.55,z:12,name:'NEW ARRIVALS',color:0x987d4b},
+ {x:13.55,z:12,name:'C&N COLLECTION',color:0x4b8290}
 ];
 
-let productCount=0;
+for(const s of shopData){
+ const side=s.x<0?1:-1;
+ block(.16,3.4,7,s.x,1.8,s.z,0xd8d0c2);
+ block(.2,3.0,5.8,s.x-side*.12,1.8,s.z,s.color);
+ // glass-style window
+ const glass=block(.08,2.1,4.8,s.x-side*.23,1.9,s.z,0x8db9c9,{roughness:.18,metalness:.2});
+ glass.material.transparent=true;
+ glass.material.opacity=.58;
+ block(.15,.14,5.2,s.x-side*.3,.8,s.z,0xd3ae63);
+ block(.15,.14,5.2,s.x-side*.3,3.0,s.z,0xd3ae63);
+ block(.15,2.3,.12,s.x-side*.3,1.9,s.z-2.55,0xd3ae63);
+ block(.15,2.3,.12,s.x-side*.3,1.9,s.z+2.55,0xd3ae63);
+ block(1.5,.35,.25,s.x-side*.42,3.45,s.z,0x172c3a);
+ glow(.9,.035,.04,s.x-side*.57,3.45,s.z,0xf3cf78);
+}
 
-for(let row=-1;row<=1;row++){
-  const z=row*8;
-  for(let x=-9;x<=9;x+=6){
-    // Shelf body
-    box(3.2,3.1,1.2,x,1.55,z,0x785239);
+// Store shelves with detailed product shapes
+const productColors=[
+ 0xc64c45,0x367eae,0xd6a848,0x4e9569,
+ 0x9162a9,0xe18448,0xd46c91,0x5da9a4
+];
 
-    // Shelf backing
-    box(3.05,2.8,0.12,x,1.6,z+0.57,0x49372d);
+const products=[
+ {id:'001',name:'Classic T-Shirt',category:'Fashion',price:2500,icon:'👕',description:'Sample everyday clothing item.',pos:[-9.4,1.2,10]},
+ {id:'002',name:'Smart TV 55 inch',category:'Electronics',price:65000,icon:'📺',description:'Sample electronics item.',pos:[9.4,1.3,10]},
+ {id:'003',name:'Sofa Set',category:'Home & Living',price:120000,icon:'🛋️',description:'Sample home and living item.',pos:[-9.4,1.2,2]},
+ {id:'004',name:'Face Cream',category:'Beauty & Health',price:3500,icon:'🧴',description:'Sample personal care item.',pos:[9.4,1.2,2]},
+ {id:'005',name:'Sports Shoes',category:'Fashion',price:8500,icon:'👟',description:'Sample footwear item.',pos:[-9.4,1.2,-6]},
+ {id:'006',name:'Headphones',category:'Electronics',price:12000,icon:'🎧',description:'Sample audio item.',pos:[9.4,1.2,-6]},
+ {id:'007',name:'Table Lamp',category:'Home & Living',price:4500,icon:'💡',description:'Sample home accessory.',pos:[-9.4,1.2,-14]},
+ {id:'008',name:'Perfume',category:'Beauty & Health',price:6000,icon:'🧴',description:'Sample fragrance item.',pos:[9.4,1.2,-14]}
+];
 
-    for(const y of [0.65,1.5,2.35]){
-      box(3.4,0.14,1.45,x,y,z,0xd0ae80);
+const displayObjects=[];
 
-      for(let i=0;i<4;i++){
-        const c=productColors[
-          (i+Math.round(Math.abs(x))+Math.abs(row)*2)%productColors.length
-        ];
+function makeProductShape(p,index){
+ const [x,y,z]=p.pos;
+ const c=productColors[index%productColors.length];
+ const right=x>0;
+ const frontX=x+(right?-.55:.55);
 
-        const px=x-1.12+i*0.74;
-        const height=0.38+(i%2)*0.12;
+ if(index===1){
+  block(.22,1.1,1.35,frontX,y,z,0x252b31,{roughness:.2,metalness:.3});
+  block(.08,.82,1.12,frontX+(right?-.13:.13),y,z,0x182d3a,{roughness:.2});
+  glow(.025,.09,.7,frontX+(right?-.19:.19),y,z,0x66a8cf);
+ }else if(index===2){
+  block(1.1,.65,.85,frontX,y-.2,z,0x6f5140);
+  block(1.1,.16,.85,frontX,y+.18,z,0xc19a70);
+  block(.13,.38,.8,frontX,y+.45,z,0x8a6952);
+ }else if(index===4){
+  block(.45,.48,.5,frontX,y-.05,z,0xeee4d2);
+  cylinder(.12,.13,.18,frontX,y+.28,z,0xd8ae64);
+ }else if(index===5){
+  cylinder(.2,.24,.48,frontX,y,z,c);
+  cylinder(.1,.1,.12,frontX,y+.3,z,0x33383d);
+ }else if(index===6){
+  cylinder(.19,.19,.65,frontX,y,z,c);
+  cylinder(.1,.1,.08,frontX,y+.36,z,0xd6c19c);
+ }else{
+  block(.48,.56,.42,frontX,y,z,c);
+  block(.36,.12,.04,frontX,y+.08,z+(right?.22:-.22),0xf4e6c4);
+  block(.18,.09,.045,frontX,y-.1,z+(right?.245:-.245),0x283743);
+ }
+ return new THREE.Vector3(x,y,z);
+}
 
-        box(0.48,height,0.48,px,y+0.16+height/2,z-0.12,c);
-
-        // Product label
-        box(0.3,0.1,0.025,px,y+0.2,z-0.37,0xffffff);
-
-        productCount++;
-      }
+// Shelves are positioned against both sides, leaving a wide centre aisle
+for(let side of [-1,1]){
+ for(let z of [-14,-6,2,10]){
+  const sx=side*10.7;
+  block(1.5,2.8,5.3,sx,1.4,z,0x72513b);
+  block(1.54,.12,5.4,sx,2.8,z,0xd2ad78);
+  for(let y of [.65,1.45,2.25]){
+   block(1.6,.12,5.45,sx,y,z,0xd5b78d);
+   for(let i=0;i<6;i++){
+    const pz=z-2.1+i*.82;
+    const col=productColors[(i+Math.round(z+20))%productColors.length];
+    if(i%3===0){
+     cylinder(.16,.19,.38,sx-side*.3,y+.28,pz,col);
+     cylinder(.08,.08,.08,sx-side*.3,y+.51,pz,0xd9c8a3);
+    }else{
+     block(.35,.42,.35,sx-side*.32,y+.29,pz,col);
+     block(.24,.08,.03,sx-side*.52,y+.3,pz,0xf2e5c9);
     }
-
-    // Shelf golden top trim
-    box(3.35,0.1,0.12,x,3.12,z-0.56,0xe8bd58);
+   }
   }
+ }
 }
 
-// Main checkout counter
-box(4.5,1.1,1.5,0,0.55,-15,0x263f4b);
-box(4.7,0.12,1.7,0,1.15,-15,0xe8bd58);
-box(1.1,0.8,0.08,0,1.65,-14.4,0x263f4b);
-glowBox(0.75,0.15,0.08,0,1.68,-14.34,0x8de3be);
+// Place each selectable display at its shelf
+products.forEach((p,i)=>{
+ makeProductShape(p,i);
+ const marker= new THREE.Mesh(
+  new THREE.TorusGeometry(.48,.035,8,24),
+  new THREE.MeshBasicMaterial({color:0xffd05c})
+ );
+ marker.rotation.x=Math.PI/2;
+ marker.position.set(p.pos[0],.13,p.pos[2]);
+ scene.add(marker);
+ p.marker=marker;
+});
 
-// Decorative pillars
-for(const x of [-12,12]){
-  for(const z of [-13,0,13]){
-    box(0.65,4.5,0.65,x,2.1,z,0xe6d6b8);
-    box(0.9,0.18,0.9,x,4.3,z,0xd1a84c);
-    box(0.9,0.18,0.9,x,0.0,z,0xd1a84c);
+// Welcome counter
+block(4.4,1.1,1.5,0,.55,-17,0x273e4c);
+block(4.6,.12,1.65,0,1.15,-17,0xd5ae60);
+block(2.9,.48,.12,0,1.52,-16.2,0x162b38);
+glow(2.2,.045,.035,0,1.57,-16.1,0xffd574);
+
+// Decorative planters and indoor plants
+for(const x of [-6,6]){
+ for(const z of [-13,0,13]){
+  cylinder(.48,.58,.75,x,.34,z,0x8e7354);
+  cylinder(.36,.22,.12,x,.74,z,0x3c5b42);
+  for(let i=0;i<5;i++){
+   const a=i*Math.PI*2/5;
+   const leaf=new THREE.Mesh(
+    new THREE.ConeGeometry(.19,.85,8),
+    mat(0x397653,.8)
+   );
+   leaf.position.set(x+Math.cos(a)*.23,1.12,z+Math.sin(a)*.23);
+   leaf.rotation.z=Math.cos(a)*.28;
+   leaf.castShadow=true;
+   scene.add(leaf);
   }
+ }
 }
 
-// Entrance decorative arches
-box(0.25,3.6,0.25,-5,1.7,17,0xd3aa56);
-box(0.25,3.6,0.25,5,1.7,17,0xd3aa56);
-box(10.25,0.25,0.25,0,3.5,17,0xd3aa56);
-
-// Keyboard movement
+// Movement and controls
 const keys={};
-
 addEventListener('keydown',e=>{
-  keys[e.key.toLowerCase()]=true;
+ keys[e.key.toLowerCase()]=true;
+ if(e.key.toLowerCase()==='e')viewNearest();
+ if(e.key==='Escape')closePanels();
 });
-addEventListener('keyup',e=>{
-  keys[e.key.toLowerCase()]=false;
-});
-addEventListener('blur',()=>{
-  for(const k in keys) keys[k]=false;
-});
+addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+addEventListener('blur',()=>{for(const k in keys)keys[k]=false});
 
-// Camera looking and movement
-let yaw=0;
-let pitch=0;
-let dragging=false;
-let lastX=0;
-let lastY=0;
+let yaw=0,pitch=0,dragging=false,lastX=0,lastY=0;
 
 renderer.domElement.addEventListener('pointerdown',e=>{
-  if(e.pointerType==='mouse'){
-    dragging=true;
-    lastX=e.clientX;
-    lastY=e.clientY;
-  }
+ if(e.pointerType==='mouse'){
+  dragging=true;lastX=e.clientX;lastY=e.clientY;
+ }
 });
-
 addEventListener('pointerup',()=>dragging=false);
 
 renderer.domElement.addEventListener('pointermove',e=>{
-  if(e.pointerType==='touch'){
-    if(e.clientY<innerHeight*0.65 && e.clientX>innerWidth*0.28){
-      if(renderer.domElement.dataset.touching==='1'){
-        yaw-=(e.clientX-lastX)*0.005;
-        pitch-=(e.clientY-lastY)*0.004;
-        pitch=Math.max(-0.8,Math.min(0.8,pitch));
-      }
-      lastX=e.clientX;
-      lastY=e.clientY;
-      renderer.domElement.dataset.touching='1';
-    }
-    return;
-  }
-
-  if(!dragging)return;
-  yaw-=(e.clientX-lastX)*0.004;
-  pitch-=(e.clientY-lastY)*0.004;
-  pitch=Math.max(-0.8,Math.min(0.8,pitch));
-  lastX=e.clientX;
-  lastY=e.clientY;
+ if(!dragging)return;
+ yaw-=(e.clientX-lastX)*.004;
+ pitch-=(e.clientY-lastY)*.003;
+ pitch=Math.max(-.65,Math.min(.65,pitch));
+ lastX=e.clientX;lastY=e.clientY;
 });
 
-renderer.domElement.addEventListener('pointerup',()=>{
-  renderer.domElement.dataset.touching='0';
-});
-renderer.domElement.addEventListener('pointercancel',()=>{
-  renderer.domElement.dataset.touching='0';
-});
-
-// Mobile buttons
-document.querySelectorAll('[data-key]').forEach(button=>{
-  const key=button.dataset.key;
-
-  const start=e=>{
-    e.preventDefault();
-    keys[key]=true;
-    button.classList.add('active');
-  };
-
-  const stop=e=>{
-    e.preventDefault();
-    keys[key]=false;
-    button.classList.remove('active');
-  };
-
-  button.addEventListener('pointerdown',start);
-  button.addEventListener('pointerup',stop);
-  button.addEventListener('pointercancel',stop);
-  button.addEventListener('lostpointercapture',stop);
+document.querySelectorAll('[data-key]').forEach(b=>{
+ const k=b.dataset.key;
+ const start=e=>{e.preventDefault();keys[k]=true};
+ const stop=e=>{e.preventDefault();keys[k]=false};
+ b.addEventListener('pointerdown',start);
+ b.addEventListener('pointerup',stop);
+ b.addEventListener('pointercancel',stop);
+ b.addEventListener('lostpointercapture',stop);
 });
 
-document.querySelectorAll('[data-look]').forEach(button=>{
-  const direction=button.dataset.look;
-  const turn=()=>{
-    if(direction==='left')yaw+=0.15;
-    if(direction==='right')yaw-=0.15;
-    if(direction==='up')pitch=Math.min(0.8,pitch+0.1);
-    if(direction==='down')pitch=Math.max(-0.8,pitch-0.1);
-  };
-
-  button.addEventListener('pointerdown',e=>{
-    e.preventDefault();
-    turn();
-  });
+document.querySelectorAll('[data-turn]').forEach(b=>{
+ b.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  yaw+=b.dataset.turn==='left'?.18:-.18;
+ });
 });
 
-// Main animation loop
-const status=document.getElementById('status');
+document.querySelectorAll('[data-tilt]').forEach(b=>{
+ b.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  pitch=Math.max(-.65,Math.min(.65,pitch+(b.dataset.tilt==='up'?.1:-.1)));
+ });
+});
 
-function animate(){
-  requestAnimationFrame(animate);
+const statusEl=document.getElementById('status');
+const moneyEl=document.getElementById('money');
+const cart={};
+let selected=null;
 
-  const speed=0.105;
-  const forward=
-    (keys.w||keys.arrowup?1:0)-
-    (keys.s||keys.arrowdown?1:0);
-  const side=
-    (keys.d||keys.arrowright?1:0)-
-    (keys.a||keys.arrowleft?1:0);
+function money(n){return 'Rs. '+Number(n).toLocaleString('en-LK')}
+function cartCount(){return Object.values(cart).reduce((a,b)=>a+b,0)}
+function cartTotal(){return products.reduce((sum,p)=>sum+p.price*(cart[p.id]||0),0)}
 
-  camera.position.x+=
-    (-Math.sin(yaw)*forward+Math.cos(yaw)*side)*speed;
-
-  camera.position.z+=
-    (-Math.cos(yaw)*forward-Math.sin(yaw)*side)*speed;
-
-  camera.position.x=Math.max(-12,Math.min(12,camera.position.x));
-  camera.position.z=Math.max(-17,Math.min(17,camera.position.z));
-  camera.position.y=2;
-
-  camera.rotation.order='YXZ';
-  camera.rotation.y=yaw;
-  camera.rotation.x=pitch;
-
-  status.textContent='Explore the Mall | Products: '+productCount;
-
-  renderer.render(scene,camera);
+function nearestProduct(){
+ let nearest=null,best=Infinity;
+ for(const p of products){
+  const dx=p.pos[0]-camera.position.x;
+  const dz=p.pos[2]-camera.position.z;
+  const d=Math.hypot(dx,dz);
+  if(d<best){best=d;nearest=p}
+ }
+ return best<3.8?nearest:null;
 }
 
+function viewNearest(){
+ const p=nearestProduct();
+ if(!p){
+  toast('Walk closer to a highlighted product first.');
+  return;
+ }
+ selected=p;
+ document.getElementById('productName').textContent=p.name;
+ document.getElementById('productIcon').textContent=p.icon;
+ document.getElementById('productCategory').textContent=p.category+' · Code '+p.id;
+ document.getElementById('productPrice').textContent=money(p.price);
+ document.getElementById('productDescription').textContent=p.description;
+ document.getElementById('productPanel').style.display='block';
+}
+
+function toast(msg){
+ const el=document.getElementById('toast');
+ el.textContent=msg;el.style.display='block';
+ clearTimeout(toast.timer);
+ toast.timer=setTimeout(()=>el.style.display='none',2300);
+}
+
+function closePanels(){
+ document.getElementById('productPanel').style.display='none';
+ document.getElementById('cartPanel').style.display='none';
+}
+document.querySelectorAll('[data-close]').forEach(b=>{
+ b.addEventListener('click',()=>document.getElementById(b.dataset.close).style.display='none');
+});
+
+document.getElementById('viewBtn').addEventListener('click',viewNearest);
+
+document.getElementById('addBtn').addEventListener('click',()=>{
+ if(!selected)return;
+ cart[selected.id]=(cart[selected.id]||0)+1;
+ moneyEl.textContent='🛒 Cart: '+cartCount()+' items';
+ document.getElementById('productPanel').style.display='none';
+ toast(selected.name+' added to cart!');
+});
+
+function showCart(){
+ closePanels();
+ const lines=products.filter(p=>cart[p.id]).map(p=>
+  p.name+' × '+cart[p.id]+' = '+money(p.price*cart[p.id])
+ );
+ document.getElementById('cartLines').textContent=lines.length?lines.join('\n'):'Your cart is empty.';
+ document.getElementById('cartTotal').textContent='Total: '+money(cartTotal());
+ document.getElementById('cartPanel').style.display='block';
+}
+document.getElementById('cartBtn').addEventListener('click',showCart);
+
+document.getElementById('clearBtn').addEventListener('click',()=>{
+ for(const k in cart)delete cart[k];
+ moneyEl.textContent='🛒 Cart: 0 items';
+ showCart();
+});
+
+document.getElementById('orderBtn').addEventListener('click',()=>{
+ const chosen=products.filter(p=>cart[p.id]);
+ if(!chosen.length){toast('Your cart is empty. Add a product first.');return}
+ const lines=chosen.map(p=>p.name+' × '+cart[p.id]+' — '+money(p.price*cart[p.id])).join('\n');
+ const msg=
+  'Hello C&N SHOPPING HALL!\n\nI would like to order:\n'+lines+
+  '\n\nEstimated total: '+money(cartTotal())+
+  '\n\nPlease confirm stock availability, final prices, delivery fee and Cash on Delivery details.';
+ const url='https://wa.me/'+WHATSAPP_NUMBER+'?text='+encodeURIComponent(msg);
+ window.open(url,'_blank');
+});
+
+function animate(){
+ requestAnimationFrame(animate);
+ const speed=.095;
+ const forward=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0);
+ const side=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0);
+ const length=Math.hypot(forward,side)||1;
+ camera.position.x+=(-Math.sin(yaw)*forward+Math.cos(yaw)*side)/length*speed;
+ camera.position.z+=(-Math.cos(yaw)*forward-Math.sin(yaw)*side)/length*speed;
+
+ camera.position.x=Math.max(-12,Math.min(12,camera.position.x));
+ camera.position.z=Math.max(-18,Math.min(18,camera.position.z));
+ camera.position.y=1.75;
+ camera.rotation.order='YXZ';
+ camera.rotation.y=yaw;
+ camera.rotation.x=pitch;
+
+ const p=nearestProduct();
+ if(p){
+  statusEl.textContent='Nearby: '+p.name+' · '+money(p.price)+' · Press View Product';
+ }else{
+  statusEl.textContent='Explore the mall and approach a highlighted product.';
+ }
+
+ for(const item of products){
+  const close=p===item;
+  item.marker.material.color.setHex(close?0x7dffb0:0xffd05c);
+  item.marker.scale.setScalar(close?1.18:1);
+ }
+
+ renderer.render(scene,camera);
+}
 animate();
 
 addEventListener('resize',()=>{
-  camera.aspect=innerWidth/innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth,innerHeight);
-  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+ camera.aspect=innerWidth/innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(innerWidth,innerHeight);
+ renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
 });
 </script>
 </body>
